@@ -468,17 +468,10 @@ function calc() {
   const notifP  = parseFloat(document.getElementById('i-notif').value) / 100;
   const openP   = parseFloat(document.getElementById('i-open').value) / 100;
 
-  s('v-base',    fmt(base));
-  s('v-guest',   (guestP*100).toFixed(0) + '%');
-  s('v-loc-on',  (locOnP*100).toFixed(1) + '%');
-  s('v-loc-off', (locOffP*100).toFixed(1) + '%');
-  document.getElementById('i-loc-off').value = (locOffP*100).toFixed(1);
-  s('v-diff',    (diffP*100).toFixed(0) + '%');
-  s('v-notif',   (notifP*100).toFixed(0) + '%');
-  s('v-open',    (openP*100).toFixed(0) + '%');
-
   const r = calcCovered(base, guestP, locOnP, locOffP, diffP, notifP, openP);
-  const { guests, loggedIn, locOn, locOff, n1Open, n1Closed, n0Open, n0Closed,
+  const { guests, loggedIn, locOn, locOff,
+          notifOn, notifOff,
+          n1Open, n1Closed, n0Open, n0Closed,
           bookedActive, diffActive, covered, notCovered, partial } = r;
 
   // Store default baseline on first run
