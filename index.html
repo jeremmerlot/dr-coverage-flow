@@ -52,24 +52,28 @@
   .s-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
   .s-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
   .s-green .s-val { color: var(--green); } .s-red .s-val { color: var(--red); } .s-amber .s-val { color: var(--amber); }
-  .flow-tree { display: flex; flex-direction: column; align-items: center; min-width: 900px; }
-  .node { border-radius: 8px; padding: 10px 14px; text-align: center; }
-  .n-title { font-size: 12px; font-weight: 600; }
-  .n-vol { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 3px; }
-  .n-pct { font-size: 10px; margin-top: 1px; }
-  .n-status { font-size: 10px; margin-top: 4px; font-weight: 600; }
-  .n-base { background: var(--surface2); border: 1px solid var(--border); }
-  .n-green { background: var(--green-bg); border: 1px solid var(--green-border); }
-  .n-red { background: var(--red-bg); border: 1px solid var(--red-border); }
-  .n-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); }
-  .n-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); }
-  .n-green .n-status { color: var(--green); } .n-red .n-status { color: var(--red); } .n-amber .n-status { color: var(--amber); }
-  /* White output leaf nodes */
-  .n-output { background: #ffffff; border: 1.5px solid #ccc; }
-  .n-output .n-title { color: #111; }
-  .n-output .n-vol  { color: #222; }
-  .n-output .n-pct  { color: #444; }
-  .n-output .n-status { color: #111; }
+  .flow-tree { display: flex; flex-direction: column; align-items: center; min-width: 960px; }
+  /* All nodes: white bg, black text, colored border accent */
+  .node { border-radius: 8px; padding: 12px 16px; text-align: center; background: #ffffff; border: 1.5px solid #d0d5e8; }
+  .n-title  { font-size: 14px; font-weight: 700; color: #111; }
+  .n-vol    { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; margin-top: 4px; color: #222; }
+  .n-pct    { font-size: 12px; margin-top: 2px; color: #555; }
+  .n-status { font-size: 12px; margin-top: 6px; font-weight: 700; color: #222; }
+  /* Color accents via left border and status text */
+  .n-base  { border-color: #d0d5e8; }
+  .n-green { border-color: #1a5c38; border-left: 4px solid #22c97a; }
+  .n-red   { border-color: #5c2020; border-left: 4px solid #f25c5c; }
+  .n-amber { border-color: #5c3f0f; border-left: 4px solid #f5a623; }
+  .n-blue  { border-color: #2040a0; border-left: 4px solid #4f6ef7; }
+  .n-green .n-status { color: #0a7a40; }
+  .n-red   .n-status { color: #b52020; }
+  .n-amber .n-status { color: #8a5500; }
+  .n-blue  .n-status { color: #2040a0; }
+  /* Output leaf nodes (same white, colored status) */
+  .n-output { border: 1.5px solid #d0d5e8; }
+  .n-output.status-green { border-left: 4px solid #22c97a; }
+  .n-output.status-red   { border-left: 4px solid #f25c5c; }
+  .n-output.status-amber { border-left: 4px solid #f5a623; }
   .n-output.status-green .n-status { color: #0a7a40; }
   .n-output.status-red   .n-status { color: #b52020; }
   .n-output.status-amber .n-status { color: #8a5500; }
@@ -196,7 +200,7 @@
   </div>
 
   <div class="flow">
-    <div class="summary-bar">
+    <div class="summary-bar" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr">
       <div class="summary-card s-green">
         <div class="s-label">✅ Covered</div>
         <div class="s-val" id="s-covered">—</div>
@@ -211,6 +215,16 @@
         <div class="s-label">⚠ Partial / gap</div>
         <div class="s-val" id="s-partial">—</div>
         <div class="s-sub" id="s-partial-pct"></div>
+      </div>
+      <div class="summary-card" id="delta-abs-card">
+        <div class="s-label">Δ vs default (absolute)</div>
+        <div class="s-val" id="s-delta-abs" style="font-size:16px">—</div>
+        <div class="s-sub" id="s-delta-abs-sub">covered tickets</div>
+      </div>
+      <div class="summary-card" id="delta-rel-card">
+        <div class="s-label">Δ vs default (relative)</div>
+        <div class="s-val" id="s-delta-rel" style="font-size:16px">—</div>
+        <div class="s-sub" id="s-delta-rel-sub">change in coverage rate</div>
       </div>
     </div>
 
@@ -387,6 +401,9 @@
 
 <script>
 const DEFAULTS = { 'i-base': 3000000, 'i-guest': 25, 'i-loc-on': 85.7, 'i-diff': 40, 'i-notif': 84, 'i-open': 90 };
+// Locked-in real data: "other" location category = 0.7% of logged-in
+const LOC_OTHER_P = 0.007;
+let defaultCovered = null;
 
 function applyDefaults() {
   Object.entries(DEFAULTS).forEach(([id, val]) => { document.getElementById(id).value = val; });
@@ -397,14 +414,56 @@ function fmt(n) {
   if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
   return Math.round(n).toString();
 }
+function fmtDelta(n) {
+  const sign = n >= 0 ? '+' : '';
+  if (Math.abs(n) >= 1e6) return sign + (n/1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return sign + (n/1e3).toFixed(0) + 'K';
+  return sign + Math.round(n);
+}
 function pct(n, t) { return ((n/t)*100).toFixed(1) + '%'; }
 function s(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+
+function calcCovered(base, guestP, locOnP, locOffP, diffP, notifP, openP) {
+  // FIX 1: locOff uses real denied share (loc-on slider + 0.7% other = 100%)
+  // locOffP is passed as 1 - locOnP - LOC_OTHER_P (clamped to 0)
+  const guests   = base * guestP;
+  const loggedIn = base * (1 - guestP);
+  const locOn    = loggedIn * locOnP;
+  const locOff   = loggedIn * locOffP;
+
+  // FIX 2: apply openP to locOn — "while using app" requires app to be foregrounded
+  const locOnActive   = locOn * openP;         // detection actually fires
+  const locOnInactive = locOn * (1 - openP);   // app closed, detection missed
+
+  const bookedActive = locOnActive * (1 - diffP);   // ✅ confirmed on booked train
+  const diffActive   = locOnActive * diffP;          // ❌ on different train, location fires but wrong train
+  const bookedInactive = locOnInactive * (1 - diffP); // ❌ on booked train but app closed
+  const diffInactive   = locOnInactive * diffP;       // ❌ different train AND app closed
+
+  const notifOn  = locOff * notifP;
+  const notifOff = locOff * (1 - notifP);
+  const n1Open   = notifOn  * openP;
+  const n1Closed = notifOn  * (1 - openP);
+  const n0Open   = notifOff * openP;
+  const n0Closed = notifOff * (1 - openP);
+
+  // FIX 3: n0Open ("by luck") moves to partial, not covered
+  const covered    = bookedActive + n1Open;
+  const notCovered = guests + diffActive + diffInactive + bookedInactive + n0Closed;
+  const partial    = n1Closed + n0Open;
+
+  return { guests, loggedIn, locOn, locOff, locOnActive, locOnInactive,
+           bookedActive, diffActive, bookedInactive, diffInactive,
+           notifOn, notifOff, n1Open, n1Closed, n0Open, n0Closed,
+           covered, notCovered, partial };
+}
 
 function calc() {
   const base    = parseFloat(document.getElementById('i-base').value) || 3e6;
   const guestP  = parseFloat(document.getElementById('i-guest').value) / 100;
   const locOnP  = parseFloat(document.getElementById('i-loc-on').value) / 100;
-  const locOffP = 1 - locOnP;
+  // FIX 1: real loc-off = 1 - locOn - other (0.7%), clamped ≥ 0
+  const locOffP = Math.max(0, 1 - locOnP - LOC_OTHER_P);
   const diffP   = parseFloat(document.getElementById('i-diff').value) / 100;
   const notifP  = parseFloat(document.getElementById('i-notif').value) / 100;
   const openP   = parseFloat(document.getElementById('i-open').value) / 100;
@@ -418,22 +477,29 @@ function calc() {
   s('v-notif',   (notifP*100).toFixed(0) + '%');
   s('v-open',    (openP*100).toFixed(0) + '%');
 
-  const guests   = base * guestP;
-  const loggedIn = base * (1 - guestP);
-  const locOn    = loggedIn * locOnP;
-  const locOff   = loggedIn * locOffP;
-  const booked   = locOn * (1 - diffP);
-  const diff     = locOn * diffP;
-  const notifOn  = locOff * notifP;
-  const notifOff = locOff * (1 - notifP);
-  const n1Open   = notifOn  * openP;
-  const n1Closed = notifOn  * (1 - openP);
-  const n0Open   = notifOff * openP;
-  const n0Closed = notifOff * (1 - openP);
+  const r = calcCovered(base, guestP, locOnP, locOffP, diffP, notifP, openP);
+  const { guests, loggedIn, locOn, locOff, n1Open, n1Closed, n0Open, n0Closed,
+          bookedActive, diffActive, covered, notCovered, partial } = r;
 
-  const covered    = booked + n1Open + n0Open;
-  const notCovered = guests + diff + n0Closed;
-  const partial    = n1Closed;
+  // Store default baseline on first run
+  if (defaultCovered === null) defaultCovered = { covered, notCovered, partial, base };
+
+  // Delta vs defaults
+  const deltaCovAbs = covered - defaultCovered.covered;
+  const deltaCovRel = defaultCovered.covered > 0 ? (deltaCovAbs / defaultCovered.covered) * 100 : 0;
+  const absCard = document.getElementById('delta-abs-card');
+  const relCard = document.getElementById('delta-rel-card');
+  s('s-delta-abs', fmtDelta(deltaCovAbs));
+  s('s-delta-rel', (deltaCovRel >= 0 ? '+' : '') + deltaCovRel.toFixed(1) + '%');
+  const color = deltaCovAbs > 0 ? '#22c97a' : deltaCovAbs < 0 ? '#f25c5c' : '#7b85a0';
+  document.getElementById('s-delta-abs').style.color = color;
+  document.getElementById('s-delta-rel').style.color = color;
+  absCard.style.borderColor = deltaCovAbs !== 0 ? color : '';
+  relCard.style.borderColor = deltaCovAbs !== 0 ? color : '';
+
+  // Use bookedActive for the "on booked train" node (was: booked)
+  const booked = bookedActive;
+  const diff   = diffActive + r.diffInactive + r.bookedInactive; // all undetected loc-on
 
   s('f-total',         fmt(base));
   s('f-guest',         fmt(guests));        s('f-guest-pct',     pct(guests, base) + ' of total');
@@ -455,6 +521,7 @@ function calc() {
 
 function reset() {
   applyDefaults();
+  defaultCovered = null; // clear baseline so next calc() resets it
   calc();
   const btn = document.getElementById('reset-btn');
   btn.classList.add('flashed');
