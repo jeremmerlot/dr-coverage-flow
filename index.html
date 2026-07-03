@@ -64,11 +64,69 @@
   .n-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); }
   .n-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); }
   .n-green .n-status { color: var(--green); } .n-red .n-status { color: var(--red); } .n-amber .n-status { color: var(--amber); }
-  .connector { display: flex; flex-direction: column; align-items: center; padding: 2px 0; }
-  .connector .line { width: 1px; height: 16px; background: var(--border); }
-  .connector .arrow { font-size: 8px; color: var(--muted); }
-  .flow-row { display: flex; gap: 10px; align-items: flex-start; justify-content: center; width: 100%; }
-  .flow-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  /* White output leaf nodes */
+  .n-output { background: #ffffff; border: 1.5px solid #ccc; }
+  .n-output .n-title { color: #111; }
+  .n-output .n-vol  { color: #222; }
+  .n-output .n-pct  { color: #444; }
+  .n-output .n-status { color: #111; }
+  .n-output.status-green .n-status { color: #0a7a40; }
+  .n-output.status-red   .n-status { color: #b52020; }
+  .n-output.status-amber .n-status { color: #8a5500; }
+  /* Vertical connector */
+  .connector { display: flex; flex-direction: column; align-items: center; padding: 0; }
+  .connector .line { width: 1px; height: 20px; background: #4a5070; }
+  .connector .arrow { font-size: 8px; color: #4a5070; margin-top: -2px; }
+  /* Branching connector: horizontal bar + drops */
+  .flow-row { display: flex; gap: 10px; align-items: flex-start; justify-content: center; width: 100%; position: relative; }
+  .flow-col { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+  /* Top connector line on each col inside a branching row */
+  .flow-row.branching > .flow-col::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 20px;
+    background: #4a5070;
+    margin-bottom: 0;
+  }
+  /* Horizontal bar connecting siblings */
+  .flow-row.branching {
+    padding-top: 0;
+  }
+  .h-bridge {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 0;
+  }
+  .h-bridge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(25% + 10px);
+    right: calc(25% + 10px);
+    height: 1px;
+    background: #4a5070;
+  }
+  .h-bridge-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  .h-bridge-col .drop {
+    width: 1px;
+    height: 20px;
+    background: #4a5070;
+  }
+  .h-bridge-col .drop-arrow {
+    font-size: 8px;
+    color: #4a5070;
+    margin-top: -2px;
+    margin-bottom: 2px;
+  }
   .branch-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
 </style>
 </head>
@@ -195,28 +253,37 @@
             <div class="n-pct" id="f-loc-on-pct" style="color:var(--blue)">—</div>
             <div class="n-status" style="color:var(--muted)">Detection when app open</div>
           </div>
-          <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
-          <div class="flow-row">
-            <div class="flow-col">
-              <div class="branch-label">Booked train</div>
-              <div class="node n-green" style="width:180px">
-                <div class="n-title">On booked train</div>
-                <div class="n-vol" id="f-booked">—</div>
-                <div class="n-pct" id="f-booked-pct" style="color:var(--green)">—</div>
-                <div class="n-status">✅ Auto-confirmed</div>
+          <!-- bridge connector: vertical drop + horizontal bar + drops to leaves -->
+          <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+            <div style="width:1px;height:18px;background:#4a5070"></div>
+            <div style="display:flex;width:80%;position:relative">
+              <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:1px;height:18px;background:#4a5070"></div>
+                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                <div class="branch-label">Booked train</div>
+                <div class="node n-output status-green" style="width:180px">
+                  <div class="n-title">On booked train</div>
+                  <div class="n-vol" id="f-booked">—</div>
+                  <div class="n-pct" id="f-booked-pct">—</div>
+                  <div class="n-status">✅ Auto-confirmed</div>
+                </div>
               </div>
-            </div>
-            <div class="flow-col">
-              <div class="branch-label">Different train</div>
-              <div class="node n-red" style="width:180px">
-                <div class="n-title">Different train</div>
-                <div class="n-vol" id="f-diff">—</div>
-                <div class="n-pct" id="f-diff-pct" style="color:var(--red)">—</div>
-                <div class="n-status">❌ Not detected</div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:1px;height:18px;background:#4a5070"></div>
+                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                <div class="branch-label">Different train</div>
+                <div class="node n-output status-red" style="width:180px">
+                  <div class="n-title">Different train</div>
+                  <div class="n-vol" id="f-diff">—</div>
+                  <div class="n-pct" id="f-diff-pct">—</div>
+                  <div class="n-status">❌ Not detected</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
         <div class="flow-col">
           <div class="branch-label">Location denied</div>
           <div class="node n-amber" style="width:220px">
@@ -225,62 +292,88 @@
             <div class="n-pct" id="f-loc-off-pct" style="color:var(--amber)">—</div>
             <div class="n-status" style="color:var(--muted)">Needs notif or app open</div>
           </div>
-          <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
-          <div class="flow-row">
-            <div class="flow-col">
-              <div class="branch-label">Notif on</div>
-              <div class="node n-base" style="width:170px">
-                <div class="n-title">Notifications on</div>
-                <div class="n-vol" id="f-notif-on">—</div>
-                <div class="n-pct" id="f-notif-on-pct" style="color:var(--muted)">—</div>
-              </div>
-              <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
-              <div class="flow-row">
-                <div class="flow-col">
-                  <div class="branch-label">Opens</div>
-                  <div class="node n-green" style="width:120px">
-                    <div class="n-title" style="font-size:11px">Opens app</div>
-                    <div class="n-vol" id="f-n1-open">—</div>
-                    <div class="n-pct" id="f-n1-open-pct" style="color:var(--green)">—</div>
-                    <div class="n-status">✅ Prompt</div>
+          <!-- drop to notif row -->
+          <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+            <div style="width:1px;height:18px;background:#4a5070"></div>
+            <div style="display:flex;width:90%;position:relative">
+              <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
+              <!-- Notif ON col -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:1px;height:18px;background:#4a5070"></div>
+                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                <div class="branch-label">Notif on</div>
+                <div class="node n-base" style="width:170px">
+                  <div class="n-title">Notifications on</div>
+                  <div class="n-vol" id="f-notif-on">—</div>
+                  <div class="n-pct" id="f-notif-on-pct" style="color:var(--muted)">—</div>
+                </div>
+                <!-- drop to opens/closed -->
+                <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+                  <div style="width:1px;height:18px;background:#4a5070"></div>
+                  <div style="display:flex;width:90%;position:relative">
+                    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:18px;background:#4a5070"></div>
+                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                      <div class="branch-label">Opens</div>
+                      <div class="node n-output status-green" style="width:120px">
+                        <div class="n-title" style="font-size:11px">Opens app</div>
+                        <div class="n-vol" id="f-n1-open">—</div>
+                        <div class="n-pct" id="f-n1-open-pct">—</div>
+                        <div class="n-status">✅ Prompt</div>
+                      </div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:18px;background:#4a5070"></div>
+                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                      <div class="branch-label">Stays closed</div>
+                      <div class="node n-output status-amber" style="width:120px">
+                        <div class="n-title" style="font-size:11px">Doesn't open</div>
+                        <div class="n-vol" id="f-n1-closed">—</div>
+                        <div class="n-pct" id="f-n1-closed-pct">—</div>
+                        <div class="n-status">⚠ No push</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="flow-col">
-                  <div class="branch-label">Stays closed</div>
-                  <div class="node n-amber" style="width:120px">
-                    <div class="n-title" style="font-size:11px">Doesn't open</div>
-                    <div class="n-vol" id="f-n1-closed">—</div>
-                    <div class="n-pct" id="f-n1-closed-pct" style="color:var(--amber)">—</div>
-                    <div class="n-status">⚠ No push</div>
-                  </div>
-                </div>
               </div>
-            </div>
-            <div class="flow-col">
-              <div class="branch-label">Notif off</div>
-              <div class="node n-base" style="width:170px">
-                <div class="n-title">Notifications off</div>
-                <div class="n-vol" id="f-notif-off">—</div>
-                <div class="n-pct" id="f-notif-off-pct" style="color:var(--muted)">—</div>
-              </div>
-              <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
-              <div class="flow-row">
-                <div class="flow-col">
-                  <div class="branch-label">Opens</div>
-                  <div class="node n-amber" style="width:120px">
-                    <div class="n-title" style="font-size:11px">Opens app</div>
-                    <div class="n-vol" id="f-n0-open">—</div>
-                    <div class="n-pct" id="f-n0-open-pct" style="color:var(--amber)">—</div>
-                    <div class="n-status">⚠ By luck</div>
-                  </div>
+              <!-- Notif OFF col -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:1px;height:18px;background:#4a5070"></div>
+                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                <div class="branch-label">Notif off</div>
+                <div class="node n-base" style="width:170px">
+                  <div class="n-title">Notifications off</div>
+                  <div class="n-vol" id="f-notif-off">—</div>
+                  <div class="n-pct" id="f-notif-off-pct" style="color:var(--muted)">—</div>
                 </div>
-                <div class="flow-col">
-                  <div class="branch-label">Stays closed</div>
-                  <div class="node n-red" style="width:120px">
-                    <div class="n-title" style="font-size:11px">Doesn't open</div>
-                    <div class="n-vol" id="f-n0-closed">—</div>
-                    <div class="n-pct" id="f-n0-closed-pct" style="color:var(--red)">—</div>
-                    <div class="n-status">❌ Dead zone</div>
+                <!-- drop to opens/closed -->
+                <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+                  <div style="width:1px;height:18px;background:#4a5070"></div>
+                  <div style="display:flex;width:90%;position:relative">
+                    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:18px;background:#4a5070"></div>
+                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                      <div class="branch-label">Opens</div>
+                      <div class="node n-output status-amber" style="width:120px">
+                        <div class="n-title" style="font-size:11px">Opens app</div>
+                        <div class="n-vol" id="f-n0-open">—</div>
+                        <div class="n-pct" id="f-n0-open-pct">—</div>
+                        <div class="n-status">⚠ By luck</div>
+                      </div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:18px;background:#4a5070"></div>
+                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
+                      <div class="branch-label">Stays closed</div>
+                      <div class="node n-output status-red" style="width:120px">
+                        <div class="n-title" style="font-size:11px">Doesn't open</div>
+                        <div class="n-vol" id="f-n0-closed">—</div>
+                        <div class="n-pct" id="f-n0-closed-pct">—</div>
+                        <div class="n-status">❌ Dead zone</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
