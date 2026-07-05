@@ -261,11 +261,11 @@
                   <div style="width:1px;height:16px;background:#4a5070"></div>
                   <div style="font-size:7px;color:#4a5070">▼</div>
                   <div class="bl">Booked train</div>
-                  <div class="node n-covered" style="min-width:140px">
+                  <div class="node n-partial" style="min-width:140px">
                     <div class="nt">On booked train</div>
                     <div class="nv" id="f-loc-on-booked">—</div>
                     <div class="np" id="f-loc-on-booked-pct"></div>
-                    <div class="ns">✅ Auto-confirmed</div>
+                    <div class="ns" style="color:#8a5500">⚠ Est. — verify Aug (Auto-FMT)</div>
                   </div>
                 </div>
                 <div class="bridge-col">
@@ -430,10 +430,10 @@ function calc() {
   const swap     = locOffOther * swapP;
   const swapNo   = locOffOther * (1 - swapP);
 
-  // Coverage
-  const covered    = locOnBooked + manual + swap;
-  const notCovered = guest + manualNo + locOffBooked + swapNo;
-  const partial    = 0; // all paths resolve cleanly in this flow
+  // Coverage — locOnBooked is estimation (unverified until Aug), treated as partial
+  const covered    = manual + swap;
+  const notCovered = guest + manualNo + swapNo;
+  const partial    = locOnBooked;
 
   // Baseline
   if (defaultCovered === null) defaultCovered = covered;
@@ -465,12 +465,12 @@ function calc() {
   s('f-swap',           fmt(swap));           s('f-swap-pct',           pct(swap, base) + ' · ' + (swapP*100).toFixed(0) + '%');
   s('f-swap-no',        fmt(swapNo));         s('f-swap-no-pct',        pct(swapNo, base) + ' · ' + ((1-swapP)*100).toFixed(0) + '%');
 
-  // Top 3 opportunities (ranked by volume of uncovered trips each initiative addresses)
+  // Top 3 opportunities — use leaf-level uncovered volumes only
   const opps = [
-    { vol: guest,        name: 'Open DR to guests',              desc: 'Guest users are entirely excluded from DR today. Enabling it unlocks the largest single segment.' },
-    { vol: locOffBooked, name: 'Confirm location-denied users on booked train', desc: 'These users are likely eligible but unconfirmable — a push or retroactive claim flow could recover them.' },
-    { vol: manualNo,     name: 'Reduce "no action" on another train (loc on)', desc: 'Auto-detect train mismatch via movement/signalbox and correct silently, removing the need for manual confirmation.' },
-    { vol: swapNo,       name: 'Improve TrainSwap adoption (loc denied)',       desc: 'A contextual push when a delay is detected could drive more users to complete TrainSwap.' },
+    { vol: guest,        name: 'Open DR to guests',                          desc: 'Guest users are entirely excluded from DR today. Enabling it unlocks the largest single segment.' },
+    { vol: manualNo,     name: 'Location denied · booked train · No action', desc: '270K users on their booked train with location denied take no action. A push notification or retroactive claim flow could recover them.' },
+    { vol: locOnOther,   name: 'Another train · while using app (unverified)',desc: '497K users travelling on a different train with location on — no leaf data yet. Auto-detect via signalbox could unlock this segment. Estimation to be verified Aug.' },
+    { vol: swapNo,       name: 'Location denied · another train · No action', desc: 'Users with location denied on a different train who don\'t complete TrainSwap. A contextual push at delay moment could improve adoption.' },
   ].sort((a, b) => b.vol - a.vol).slice(0, 3);
 
   opps.forEach((o, i) => {
