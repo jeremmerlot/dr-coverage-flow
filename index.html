@@ -136,7 +136,7 @@
       </div>
     </div>
     <div class="ig">
-      <div class="ig-title">While using app · another train</div>
+      <div class="ig-title">Location denied · booked train</div>
       <div class="ir">
         <div class="il"><span>Manual Confirmation %</span><span class="val" id="v-manual"></span></div>
         <input type="range" id="i-manual" min="0" max="100" step="1"/>
@@ -272,12 +272,38 @@
                   <div style="width:1px;height:16px;background:#4a5070"></div>
                   <div style="font-size:7px;color:#4a5070">▼</div>
                   <div class="bl">Another train</div>
-                  <div class="node n-partial" style="min-width:140px">
+                  <div class="node n-gap" style="min-width:140px">
                     <div class="nt">Travelling on another train</div>
                     <div class="nv" id="f-loc-on-other">—</div>
                     <div class="np" id="f-loc-on-other-pct"></div>
+                    <div class="ns" style="color:#8a5500">⚠ Estimation — to be verified</div>
                   </div>
-                  <!-- bridge to manual/no action -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="bl">Location denied</div>
+            <div class="node n-partial" style="min-width:180px">
+              <div class="nt">Location: denied</div>
+              <div class="nv" id="f-loc-off">—</div>
+              <div class="np" id="f-loc-off-pct"></div>
+            </div>
+
+            <!-- bridge to booked/another -->
+            <div class="bridge" style="margin-top:0">
+              <div class="drop"><div class="line"></div></div>
+              <div class="bridge-line">
+                <div class="bridge-col">
+                  <div style="width:1px;height:16px;background:#4a5070"></div>
+                  <div style="font-size:7px;color:#4a5070">▼</div>
+                  <div class="bl">Booked train</div>
+                  <div class="node n-partial" style="min-width:140px">
+                    <div class="nt">On booked train</div>
+                    <div class="nv" id="f-loc-off-booked">—</div>
+                    <div class="np" id="f-loc-off-booked-pct"></div>
+                  </div>
                   <div class="bridge" style="margin-top:0">
                     <div class="drop"><div class="line"></div></div>
                     <div class="bridge-line">
@@ -304,33 +330,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col">
-            <div class="bl">Location denied</div>
-            <div class="node n-partial" style="min-width:180px">
-              <div class="nt">Location: denied</div>
-              <div class="nv" id="f-loc-off">—</div>
-              <div class="np" id="f-loc-off-pct"></div>
-            </div>
-
-            <!-- bridge to booked/another -->
-            <div class="bridge" style="margin-top:0">
-              <div class="drop"><div class="line"></div></div>
-              <div class="bridge-line">
-                <div class="bridge-col">
-                  <div style="width:1px;height:16px;background:#4a5070"></div>
-                  <div style="font-size:7px;color:#4a5070">▼</div>
-                  <div class="bl">Booked train</div>
-                  <div class="node n-gap" style="min-width:140px">
-                    <div class="nt">On booked train</div>
-                    <div class="nv" id="f-loc-off-booked">—</div>
-                    <div class="np" id="f-loc-off-booked-pct"></div>
-                    <div class="ns">❌ Not confirmed</div>
                   </div>
                 </div>
                 <div class="bridge-col">
@@ -426,8 +425,8 @@ function calc() {
   const locOffBooked = locOff * bookedP;
   const locOffOther  = locOff * (1 - bookedP);
 
-  const manual   = locOnOther * manualP;
-  const manualNo = locOnOther * (1 - manualP);
+  const manual   = locOffBooked * manualP;
+  const manualNo = locOffBooked * (1 - manualP);
   const swap     = locOffOther * swapP;
   const swapNo   = locOffOther * (1 - swapP);
 
