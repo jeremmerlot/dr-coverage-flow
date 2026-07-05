@@ -3,389 +3,305 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Delay Repay — Flexible Ticket Coverage</title>
+<title>DR Flexible Tickets — Targeted Workflow</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0f1117; --surface: #181c27; --surface2: #1f2436; --border: #2a3050;
-    --text: #e8ecf4; --muted: #7b85a0; --accent: #4f6ef7;
-    --green: #22c97a; --green-bg: #0d2a1c; --green-border: #1a5c38;
-    --red: #f25c5c; --red-bg: #2a0f0f; --red-border: #5c2020;
-    --amber: #f5a623; --amber-bg: #2a1f0a; --amber-border: #5c3f0f;
-    --blue: #4f6ef7; --blue-bg: #0f1a3a; --blue-border: #2040a0;
+    --text: #e8ecf4; --muted: #7b85a0;
+    --green: #22c97a; --red: #f25c5c; --amber: #f5a623; --blue: #4f6ef7;
   }
   body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
-  .logo { width: 28px; height: 28px; background: #00c882; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #000; }
-  header h1 { font-size: 14px; font-weight: 600; }
-  header span { font-size: 12px; color: var(--muted); margin-left: 4px; }
-  .reset-btn {
-    margin-left: auto; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 14px; color: var(--muted);
-    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .reset-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--blue-bg); }
+
+  /* HEADER */
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 26px; height: 26px; background: #00c882; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #000; }
+  header h1 { font-size: 13px; font-weight: 600; }
+  header span { font-size: 11px; color: var(--muted); }
+  .reset-btn { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+  .reset-btn:hover { border-color: var(--blue); color: var(--blue); }
   .reset-btn.flashed { border-color: var(--green) !important; color: var(--green) !important; }
-  .reset-btn svg { width: 12px; height: 12px; }
-  .layout { display: grid; grid-template-columns: 280px 1fr; height: calc(100vh - 57px); }
-  .inputs { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 16px; }
-  .inputs h2 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; }
-  .input-group { margin-bottom: 20px; }
-  .input-group-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-  .input-row { margin-bottom: 12px; }
-  .input-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-  .input-label span:first-child { font-size: 12px; color: var(--text); }
-  .val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--blue-bg); padding: 2px 6px; border-radius: 4px; }
-  .base-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; }
-  .base-input:focus { border-color: var(--accent); }
-  input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); cursor: pointer; }
-  input[type=range]:disabled { opacity: 0.4; cursor: default; }
-  .hint { font-size: 10px; color: var(--muted); margin-top: 3px; }
-  .flow { overflow-y: auto; overflow-x: auto; padding: 24px; background: var(--bg); }
-  .summary-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-  .s-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
-  .s-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
-  .s-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .s-green .s-val { color: var(--green); } .s-red .s-val { color: var(--red); } .s-amber .s-val { color: var(--amber); }
-  .flow-tree { display: flex; flex-direction: column; align-items: center; min-width: 960px; }
-  /* All nodes: white bg, black text, colored border accent */
-  .node { border-radius: 8px; padding: 12px 16px; text-align: center; background: #ffffff; border: 1.5px solid #d0d5e8; }
-  .n-title  { font-size: 14px; font-weight: 700; color: #111; }
-  .n-vol    { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; margin-top: 4px; color: #222; }
-  .n-pct    { font-size: 12px; margin-top: 2px; color: #555; }
-  .n-status { font-size: 12px; margin-top: 6px; font-weight: 700; color: #222; }
-  /* Color accents via left border and status text */
-  .n-base  { border-color: #d0d5e8; }
-  .n-green { border-color: #1a5c38; border-left: 4px solid #22c97a; }
-  .n-red   { border-color: #5c2020; border-left: 4px solid #f25c5c; }
-  .n-amber { border-color: #5c3f0f; border-left: 4px solid #f5a623; }
-  .n-blue  { border-color: #2040a0; border-left: 4px solid #4f6ef7; }
-  .n-green .n-status { color: #0a7a40; }
-  .n-red   .n-status { color: #b52020; }
-  .n-amber .n-status { color: #8a5500; }
-  .n-blue  .n-status { color: #2040a0; }
-  /* Output leaf nodes (same white, colored status) */
-  .n-output { border: 1.5px solid #d0d5e8; }
-  .n-output.status-green { border-left: 4px solid #22c97a; }
-  .n-output.status-red   { border-left: 4px solid #f25c5c; }
-  .n-output.status-amber { border-left: 4px solid #f5a623; }
-  .n-output.status-green .n-status { color: #0a7a40; }
-  .n-output.status-red   .n-status { color: #b52020; }
-  .n-output.status-amber .n-status { color: #8a5500; }
-  /* Vertical connector */
-  .connector { display: flex; flex-direction: column; align-items: center; padding: 0; }
-  .connector .line { width: 1px; height: 20px; background: #4a5070; }
-  .connector .arrow { font-size: 8px; color: #4a5070; margin-top: -2px; }
-  /* Branching connector: horizontal bar + drops */
-  .flow-row { display: flex; gap: 10px; align-items: flex-start; justify-content: center; width: 100%; position: relative; }
-  .flow-col { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-  /* Top connector line on each col inside a branching row */
-  .flow-row.branching > .flow-col::before {
-    content: '';
-    display: block;
-    width: 1px;
-    height: 20px;
-    background: #4a5070;
-    margin-bottom: 0;
-  }
-  /* Horizontal bar connecting siblings */
-  .flow-row.branching {
-    padding-top: 0;
-  }
-  .h-bridge {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
-    position: relative;
-    margin-bottom: 0;
-  }
-  .h-bridge::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: calc(25% + 10px);
-    right: calc(25% + 10px);
-    height: 1px;
-    background: #4a5070;
-  }
-  .h-bridge-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-  }
-  .h-bridge-col .drop {
-    width: 1px;
-    height: 20px;
-    background: #4a5070;
-  }
-  .h-bridge-col .drop-arrow {
-    font-size: 8px;
-    color: #4a5070;
-    margin-top: -2px;
-    margin-bottom: 2px;
-  }
-  .branch-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 260px 1fr; height: calc(100vh - 53px); }
+
+  /* INPUTS */
+  .inputs { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 18px 14px; }
+  .inputs h2 { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 14px; }
+  .ig { margin-bottom: 18px; }
+  .ig-title { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+  .ir { margin-bottom: 10px; }
+  .il { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .il span { font-size: 11px; color: var(--text); }
+  .val { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--blue); background: #0f1a3a; padding: 2px 5px; border-radius: 3px; }
+  input[type=number] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; outline: none; }
+  input[type=number]:focus { border-color: var(--blue); }
+  input[type=range] { width: 100%; height: 3px; -webkit-appearance: none; appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--blue); border: 2px solid var(--bg); cursor: pointer; }
+  .hint { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* MAIN */
+  .main { overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* SUMMARY */
+  .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .sc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .sc .sl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
+  .sc .sv { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; }
+  .sc .ss { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .sc-green .sv { color: var(--green); } .sc-red .sv { color: var(--red); } .sc-amber .sv { color: var(--amber); }
+
+  /* OPPORTUNITIES */
+  .opps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .opp { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .opp-rank { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
+  .opp-vol { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--amber); }
+  .opp-name { font-size: 11px; font-weight: 600; color: var(--text); margin: 3px 0 2px; }
+  .opp-desc { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+  /* FLOW */
+  .flow-wrap { overflow-x: auto; }
+  .flow { min-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  /* NODES */
+  .node { border-radius: 7px; padding: 9px 13px; text-align: center; background: #fff; border: 1.5px solid #d0d5e8; min-width: 130px; }
+  .nt { font-size: 12px; font-weight: 700; color: #111; }
+  .nv { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #222; margin-top: 3px; }
+  .np { font-size: 10px; color: #666; margin-top: 1px; }
+  .ns { font-size: 10px; font-weight: 700; margin-top: 4px; }
+  .n-covered { border-left: 4px solid var(--green); }
+  .n-covered .ns { color: #0a7a40; }
+  .n-gap { border-left: 4px solid var(--red); }
+  .n-gap .ns { color: #b52020; }
+  .n-partial { border-left: 4px solid var(--amber); }
+  .n-partial .ns { color: #8a5500; }
+  .n-neutral { border-left: 4px solid var(--blue); }
+  .n-base { border-left: 4px solid #888; }
+
+  /* CONNECTORS */
+  .drop { display: flex; flex-direction: column; align-items: center; }
+  .drop .line { width: 1px; height: 18px; background: #4a5070; }
+  .drop .arr { font-size: 7px; color: #4a5070; }
+  .row { display: flex; justify-content: center; align-items: flex-start; width: 100%; gap: 8px; }
+  .col { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .bl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 3px; }
+  .bridge { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .bridge-line { display: flex; width: 80%; position: relative; }
+  .bridge-line::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: #4a5070; }
+  .bridge-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; align-self: flex-start; }
 </style>
 </head>
 <body>
 <header>
   <div class="logo">T</div>
-  <h1>Delay Repay — Flexible Ticket Coverage</h1>
-  <span>Edit inputs to recalculate</span>
-  <button class="reset-btn" id="reset-btn">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M1 4h10a4 4 0 1 1 0 8H1"/><polyline points="4 1 1 4 4 7"/>
-    </svg>
-    Reset to defaults
-  </button>
+  <h1>DR Flexible Tickets — Targeted Workflow</h1>
+  <span>Delayed trips base · edit inputs to recalculate</span>
+  <button class="reset-btn" id="reset-btn">↺ Reset</button>
 </header>
 
 <div class="layout">
+  <!-- INPUTS -->
   <div class="inputs">
     <h2>Inputs</h2>
-    <div class="input-group">
-      <div class="input-group-title">Base</div>
-      <div class="input-row">
-        <div class="input-label"><span>Total flexible tickets</span><span class="val" id="v-base"></span></div>
-        <input type="number" class="base-input" id="i-base" min="1" step="100000"/>
+    <div class="ig">
+      <div class="ig-title">Base</div>
+      <div class="ir">
+        <div class="il"><span>Delayed flexible trips</span><span class="val" id="v-base"></span></div>
+        <input type="number" id="i-base" min="1" step="10000"/>
       </div>
     </div>
-    <div class="input-group">
-      <div class="input-group-title">User type</div>
-      <div class="input-row">
-        <div class="input-label"><span>Guest users</span><span class="val" id="v-guest"></span></div>
+    <div class="ig">
+      <div class="ig-title">User type</div>
+      <div class="ir">
+        <div class="il"><span>Guest %</span><span class="val" id="v-guest"></span></div>
         <input type="range" id="i-guest" min="0" max="100" step="1"/>
       </div>
     </div>
-    <div class="input-group">
-      <div class="input-group-title">Location permission</div>
-      <div class="input-row">
-        <div class="input-label"><span>While using app</span><span class="val" id="v-loc-on"></span></div>
-        <input type="range" id="i-loc-on" min="0" max="100" step="0.1"/>
-      </div>
-      <div class="input-row">
-        <div class="input-label"><span>Denied</span><span class="val" id="v-loc-off"></span></div>
-        <input type="range" id="i-loc-off" min="0" max="100" step="0.1" disabled/>
-        <div class="hint">Auto-calculated (100% − while using app)</div>
+    <div class="ig">
+      <div class="ig-title">Location</div>
+      <div class="ir">
+        <div class="il"><span>While using app %</span><span class="val" id="v-loc"></span></div>
+        <input type="range" id="i-loc" min="0" max="100" step="1"/>
+        <div class="hint">Denied = 100% − this</div>
       </div>
     </div>
-    <div class="input-group">
-      <div class="input-group-title">Train match (location on)</div>
-      <div class="input-row">
-        <div class="input-label"><span>On different train</span><span class="val" id="v-diff"></span></div>
-        <input type="range" id="i-diff" min="0" max="100" step="1"/>
+    <div class="ig">
+      <div class="ig-title">Train match (both branches)</div>
+      <div class="ir">
+        <div class="il"><span>On booked train %</span><span class="val" id="v-booked"></span></div>
+        <input type="range" id="i-booked" min="0" max="100" step="1"/>
+        <div class="hint">Another train = 100% − this</div>
       </div>
     </div>
-    <div class="input-group">
-      <div class="input-group-title">Notifications (location denied)</div>
-      <div class="input-row">
-        <div class="input-label"><span>Notifications on</span><span class="val" id="v-notif"></span></div>
-        <input type="range" id="i-notif" min="0" max="100" step="1"/>
+    <div class="ig">
+      <div class="ig-title">While using app · another train</div>
+      <div class="ir">
+        <div class="il"><span>Manual Confirmation %</span><span class="val" id="v-manual"></span></div>
+        <input type="range" id="i-manual" min="0" max="100" step="1"/>
       </div>
     </div>
-    <div class="input-group">
-      <div class="input-group-title">App behaviour</div>
-      <div class="input-row">
-        <div class="input-label"><span>Opens app on travel day</span><span class="val" id="v-open"></span></div>
-        <input type="range" id="i-open" min="0" max="100" step="1"/>
+    <div class="ig">
+      <div class="ig-title">Location denied · another train</div>
+      <div class="ir">
+        <div class="il"><span>TrainSwap DONE %</span><span class="val" id="v-swap"></span></div>
+        <input type="range" id="i-swap" min="0" max="100" step="1"/>
       </div>
     </div>
   </div>
 
-  <div class="flow">
-    <div class="summary-bar" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr">
-      <div class="summary-card s-green">
-        <div class="s-label">✅ Covered</div>
-        <div class="s-val" id="s-covered">—</div>
-        <div class="s-sub" id="s-covered-pct"></div>
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <div class="sc sc-green">
+        <div class="sl">✅ Covered</div>
+        <div class="sv" id="s-covered">—</div>
+        <div class="ss" id="s-covered-pct"></div>
       </div>
-      <div class="summary-card s-red">
-        <div class="s-label">❌ Not covered</div>
-        <div class="s-val" id="s-notcovered">—</div>
-        <div class="s-sub" id="s-notcovered-pct"></div>
+      <div class="sc sc-red">
+        <div class="sl">❌ Not covered</div>
+        <div class="sv" id="s-notcovered">—</div>
+        <div class="ss" id="s-notcovered-pct"></div>
       </div>
-      <div class="summary-card s-amber">
-        <div class="s-label">⚠ Partial / gap</div>
-        <div class="s-val" id="s-partial">—</div>
-        <div class="s-sub" id="s-partial-pct"></div>
+      <div class="sc sc-amber">
+        <div class="sl">⚠ Partial</div>
+        <div class="sv" id="s-partial">—</div>
+        <div class="ss" id="s-partial-pct"></div>
       </div>
-      <div class="summary-card" id="delta-abs-card">
-        <div class="s-label">Δ vs default (absolute)</div>
-        <div class="s-val" id="s-delta-abs" style="font-size:16px">—</div>
-        <div class="s-sub" id="s-delta-abs-sub">covered tickets</div>
+      <div class="sc" id="delta-abs-card">
+        <div class="sl">Δ vs default (abs)</div>
+        <div class="sv" id="s-delta-abs" style="font-size:14px">—</div>
+        <div class="ss">covered tickets</div>
       </div>
-      <div class="summary-card" id="delta-rel-card">
-        <div class="s-label">Δ vs default (relative)</div>
-        <div class="s-val" id="s-delta-rel" style="font-size:16px">—</div>
-        <div class="s-sub" id="s-delta-rel-sub">change in coverage rate</div>
+      <div class="sc" id="delta-rel-card">
+        <div class="sl">Δ vs default (%)</div>
+        <div class="sv" id="s-delta-rel" style="font-size:14px">—</div>
+        <div class="ss">coverage rate change</div>
       </div>
     </div>
 
-    <div class="flow-tree">
-      <div class="node n-base" style="width:220px">
-        <div class="n-title">All flexible tickets</div>
-        <div class="n-vol" id="f-total">—</div>
-        <div class="n-pct" style="color:var(--muted)">100%</div>
-      </div>
-      <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
-
-      <div class="flow-row">
-        <div class="flow-col">
-          <div class="branch-label">Guest</div>
-          <div class="node n-red" style="width:220px">
-            <div class="n-title">Guest users</div>
-            <div class="n-vol" id="f-guest">—</div>
-            <div class="n-pct" id="f-guest-pct" style="color:var(--red)">—</div>
-            <div class="n-status">❌ DR not yet available</div>
-          </div>
+    <!-- OPPORTUNITIES -->
+    <div>
+      <div class="section-label">Top 3 opportunities</div>
+      <div class="opps">
+        <div class="opp" id="opp-1">
+          <div class="opp-rank">#1 opportunity</div>
+          <div class="opp-vol" id="opp-1-vol">—</div>
+          <div class="opp-name" id="opp-1-name">—</div>
+          <div class="opp-desc" id="opp-1-desc"></div>
         </div>
-        <div class="flow-col">
-          <div class="branch-label">Logged-in</div>
-          <div class="node n-blue" style="width:220px">
-            <div class="n-title">Logged-in users</div>
-            <div class="n-vol" id="f-loggedin">—</div>
-            <div class="n-pct" id="f-loggedin-pct" style="color:var(--blue)">—</div>
-            <div class="n-status" style="color:var(--muted)">→ enters detection flow</div>
-          </div>
+        <div class="opp" id="opp-2">
+          <div class="opp-rank">#2 opportunity</div>
+          <div class="opp-vol" id="opp-2-vol">—</div>
+          <div class="opp-name" id="opp-2-name">—</div>
+          <div class="opp-desc" id="opp-2-desc"></div>
+        </div>
+        <div class="opp" id="opp-3">
+          <div class="opp-rank">#3 opportunity</div>
+          <div class="opp-vol" id="opp-3-vol">—</div>
+          <div class="opp-name" id="opp-3-name">—</div>
+          <div class="opp-desc" id="opp-3-desc"></div>
         </div>
       </div>
-      <div class="connector"><div class="line"></div><div class="arrow">▼</div></div>
+    </div>
 
-      <div class="flow-row">
-        <div class="flow-col">
-          <div class="branch-label">Location on</div>
-          <div class="node n-blue" style="width:220px">
-            <div class="n-title">While using app</div>
-            <div class="n-vol" id="f-loc-on">—</div>
-            <div class="n-pct" id="f-loc-on-pct" style="color:var(--blue)">—</div>
-            <div class="n-status" style="color:var(--muted)">Detection when app open</div>
+    <!-- FLOW -->
+    <div class="flow-wrap">
+      <div class="flow">
+
+        <!-- ROOT -->
+        <div class="node n-base" style="min-width:200px">
+          <div class="nt">Delayed flexible trips</div>
+          <div class="nv" id="f-base">—</div>
+          <div class="np">100% · industry estimate</div>
+        </div>
+        <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
+
+        <!-- GUEST / LOGGED-IN -->
+        <div class="row">
+          <div class="col">
+            <div class="bl">Guest</div>
+            <div class="node n-gap" style="min-width:160px">
+              <div class="nt">UserType: Guest</div>
+              <div class="nv" id="f-guest">—</div>
+              <div class="np" id="f-guest-pct"></div>
+              <div class="ns">❌ Not covered</div>
+            </div>
           </div>
-          <!-- bridge connector: vertical drop + horizontal bar + drops to leaves -->
-          <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-            <div style="width:1px;height:18px;background:#4a5070"></div>
-            <div style="display:flex;width:80%;position:relative">
-              <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
-              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                <div style="width:1px;height:18px;background:#4a5070"></div>
-                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                <div class="branch-label">Booked train</div>
-                <div class="node n-output status-green" style="width:180px">
-                  <div class="n-title">On booked train</div>
-                  <div class="n-vol" id="f-booked">—</div>
-                  <div class="n-pct" id="f-booked-pct">—</div>
-                  <div class="n-status">✅ Auto-confirmed</div>
-                </div>
-              </div>
-              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                <div style="width:1px;height:18px;background:#4a5070"></div>
-                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                <div class="branch-label">Different train</div>
-                <div class="node n-output status-red" style="width:180px">
-                  <div class="n-title">Different train</div>
-                  <div class="n-vol" id="f-diff">—</div>
-                  <div class="n-pct" id="f-diff-pct">—</div>
-                  <div class="n-status">❌ Not detected</div>
-                </div>
-              </div>
+          <div class="col">
+            <div class="bl">Logged-in</div>
+            <div class="node n-neutral" style="min-width:160px">
+              <div class="nt">UserType: Logged-in</div>
+              <div class="nv" id="f-loggedin">—</div>
+              <div class="np" id="f-loggedin-pct"></div>
+              <div class="ns" style="color:var(--blue)">→ detection flow</div>
             </div>
           </div>
         </div>
+        <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
 
-        <div class="flow-col">
-          <div class="branch-label">Location denied</div>
-          <div class="node n-amber" style="width:220px">
-            <div class="n-title">Location denied</div>
-            <div class="n-vol" id="f-loc-off">—</div>
-            <div class="n-pct" id="f-loc-off-pct" style="color:var(--amber)">—</div>
-            <div class="n-status" style="color:var(--muted)">Needs notif or app open</div>
-          </div>
-          <!-- drop to notif row -->
-          <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-            <div style="width:1px;height:18px;background:#4a5070"></div>
-            <div style="display:flex;width:90%;position:relative">
-              <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
-              <!-- Notif ON col -->
-              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                <div style="width:1px;height:18px;background:#4a5070"></div>
-                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                <div class="branch-label">Notif on</div>
-                <div class="node n-base" style="width:170px">
-                  <div class="n-title">Notifications on</div>
-                  <div class="n-vol" id="f-notif-on">—</div>
-                  <div class="n-pct" id="f-notif-on-pct" style="color:var(--muted)">—</div>
-                </div>
-                <!-- drop to opens/closed -->
-                <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-                  <div style="width:1px;height:18px;background:#4a5070"></div>
-                  <div style="display:flex;width:90%;position:relative">
-                    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                      <div style="width:1px;height:18px;background:#4a5070"></div>
-                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                      <div class="branch-label">Opens</div>
-                      <div class="node n-output status-green" style="width:120px">
-                        <div class="n-title" style="font-size:11px">Opens app</div>
-                        <div class="n-vol" id="f-n1-open">—</div>
-                        <div class="n-pct" id="f-n1-open-pct">—</div>
-                        <div class="n-status">✅ Prompt</div>
-                      </div>
-                    </div>
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                      <div style="width:1px;height:18px;background:#4a5070"></div>
-                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                      <div class="branch-label">Stays closed</div>
-                      <div class="node n-output status-amber" style="width:120px">
-                        <div class="n-title" style="font-size:11px">Doesn't open</div>
-                        <div class="n-vol" id="f-n1-closed">—</div>
-                        <div class="n-pct" id="f-n1-closed-pct">—</div>
-                        <div class="n-status">⚠ No push</div>
-                      </div>
-                    </div>
+        <!-- LOCATION -->
+        <div class="row">
+          <div class="col">
+            <div class="bl">Location on</div>
+            <div class="node n-neutral" style="min-width:180px">
+              <div class="nt">Location: While using app</div>
+              <div class="nv" id="f-loc-on">—</div>
+              <div class="np" id="f-loc-on-pct"></div>
+            </div>
+
+            <!-- bridge to booked/another -->
+            <div class="bridge" style="margin-top:0">
+              <div class="drop"><div class="line"></div></div>
+              <div class="bridge-line">
+                <div class="bridge-col">
+                  <div style="width:1px;height:16px;background:#4a5070"></div>
+                  <div style="font-size:7px;color:#4a5070">▼</div>
+                  <div class="bl">Booked train</div>
+                  <div class="node n-covered" style="min-width:140px">
+                    <div class="nt">On booked train</div>
+                    <div class="nv" id="f-loc-on-booked">—</div>
+                    <div class="np" id="f-loc-on-booked-pct"></div>
+                    <div class="ns">✅ Auto-confirmed</div>
                   </div>
                 </div>
-              </div>
-              <!-- Notif OFF col -->
-              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                <div style="width:1px;height:18px;background:#4a5070"></div>
-                <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                <div class="branch-label">Notif off</div>
-                <div class="node n-base" style="width:170px">
-                  <div class="n-title">Notifications off</div>
-                  <div class="n-vol" id="f-notif-off">—</div>
-                  <div class="n-pct" id="f-notif-off-pct" style="color:var(--muted)">—</div>
-                </div>
-                <!-- drop to opens/closed -->
-                <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-                  <div style="width:1px;height:18px;background:#4a5070"></div>
-                  <div style="display:flex;width:90%;position:relative">
-                    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070"></div>
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                      <div style="width:1px;height:18px;background:#4a5070"></div>
-                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                      <div class="branch-label">Opens</div>
-                      <div class="node n-output status-amber" style="width:120px">
-                        <div class="n-title" style="font-size:11px">Opens app</div>
-                        <div class="n-vol" id="f-n0-open">—</div>
-                        <div class="n-pct" id="f-n0-open-pct">—</div>
-                        <div class="n-status">⚠ By luck</div>
+                <div class="bridge-col">
+                  <div style="width:1px;height:16px;background:#4a5070"></div>
+                  <div style="font-size:7px;color:#4a5070">▼</div>
+                  <div class="bl">Another train</div>
+                  <div class="node n-partial" style="min-width:140px">
+                    <div class="nt">Travelling on another train</div>
+                    <div class="nv" id="f-loc-on-other">—</div>
+                    <div class="np" id="f-loc-on-other-pct"></div>
+                  </div>
+                  <!-- bridge to manual/no action -->
+                  <div class="bridge" style="margin-top:0">
+                    <div class="drop"><div class="line"></div></div>
+                    <div class="bridge-line">
+                      <div class="bridge-col">
+                        <div style="width:1px;height:16px;background:#4a5070"></div>
+                        <div style="font-size:7px;color:#4a5070">▼</div>
+                        <div class="bl">Confirms</div>
+                        <div class="node n-covered" style="min-width:110px">
+                          <div class="nt">Manual Confirmation</div>
+                          <div class="nv" id="f-manual">—</div>
+                          <div class="np" id="f-manual-pct"></div>
+                          <div class="ns">✅ Covered</div>
+                        </div>
                       </div>
-                    </div>
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-                      <div style="width:1px;height:18px;background:#4a5070"></div>
-                      <div style="font-size:8px;color:#4a5070;margin-bottom:2px">▼</div>
-                      <div class="branch-label">Stays closed</div>
-                      <div class="node n-output status-red" style="width:120px">
-                        <div class="n-title" style="font-size:11px">Doesn't open</div>
-                        <div class="n-vol" id="f-n0-closed">—</div>
-                        <div class="n-pct" id="f-n0-closed-pct">—</div>
-                        <div class="n-status">❌ Dead zone</div>
+                      <div class="bridge-col">
+                        <div style="width:1px;height:16px;background:#4a5070"></div>
+                        <div style="font-size:7px;color:#4a5070">▼</div>
+                        <div class="bl">Does nothing</div>
+                        <div class="node n-gap" style="min-width:110px">
+                          <div class="nt">No action</div>
+                          <div class="nv" id="f-manual-no">—</div>
+                          <div class="np" id="f-manual-no-pct"></div>
+                          <div class="ns">❌ Not covered</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -393,135 +309,189 @@
               </div>
             </div>
           </div>
+
+          <div class="col">
+            <div class="bl">Location denied</div>
+            <div class="node n-partial" style="min-width:180px">
+              <div class="nt">Location: denied</div>
+              <div class="nv" id="f-loc-off">—</div>
+              <div class="np" id="f-loc-off-pct"></div>
+            </div>
+
+            <!-- bridge to booked/another -->
+            <div class="bridge" style="margin-top:0">
+              <div class="drop"><div class="line"></div></div>
+              <div class="bridge-line">
+                <div class="bridge-col">
+                  <div style="width:1px;height:16px;background:#4a5070"></div>
+                  <div style="font-size:7px;color:#4a5070">▼</div>
+                  <div class="bl">Booked train</div>
+                  <div class="node n-gap" style="min-width:140px">
+                    <div class="nt">On booked train</div>
+                    <div class="nv" id="f-loc-off-booked">—</div>
+                    <div class="np" id="f-loc-off-booked-pct"></div>
+                    <div class="ns">❌ Not confirmed</div>
+                  </div>
+                </div>
+                <div class="bridge-col">
+                  <div style="width:1px;height:16px;background:#4a5070"></div>
+                  <div style="font-size:7px;color:#4a5070">▼</div>
+                  <div class="bl">Another train</div>
+                  <div class="node n-partial" style="min-width:140px">
+                    <div class="nt">Travelling on another train</div>
+                    <div class="nv" id="f-loc-off-other">—</div>
+                    <div class="np" id="f-loc-off-other-pct"></div>
+                  </div>
+                  <!-- bridge to trainswap/no action -->
+                  <div class="bridge" style="margin-top:0">
+                    <div class="drop"><div class="line"></div></div>
+                    <div class="bridge-line">
+                      <div class="bridge-col">
+                        <div style="width:1px;height:16px;background:#4a5070"></div>
+                        <div style="font-size:7px;color:#4a5070">▼</div>
+                        <div class="bl">TrainSwap</div>
+                        <div class="node n-covered" style="min-width:110px">
+                          <div class="nt">TrainSwap DONE</div>
+                          <div class="nv" id="f-swap">—</div>
+                          <div class="np" id="f-swap-pct"></div>
+                          <div class="ns">✅ Covered</div>
+                        </div>
+                      </div>
+                      <div class="bridge-col">
+                        <div style="width:1px;height:16px;background:#4a5070"></div>
+                        <div style="font-size:7px;color:#4a5070">▼</div>
+                        <div class="bl">Does nothing</div>
+                        <div class="node n-gap" style="min-width:110px">
+                          <div class="nt">No action</div>
+                          <div class="nv" id="f-swap-no">—</div>
+                          <div class="np" id="f-swap-no-pct"></div>
+                          <div class="ns">❌ Not covered</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const DEFAULTS = { 'i-base': 3000000, 'i-guest': 25, 'i-loc-on': 85.7, 'i-diff': 40, 'i-notif': 84, 'i-open': 90 };
-// Locked-in real data: "other" location category = 0.7% of logged-in
-const LOC_OTHER_P = 0.007;
+const DEFAULTS = { 'i-base': 2200000, 'i-guest': 25, 'i-loc': 67, 'i-booked': 55, 'i-manual': 10, 'i-swap': 25 };
 let defaultCovered = null;
 
-function applyDefaults() {
-  Object.entries(DEFAULTS).forEach(([id, val]) => { document.getElementById(id).value = val; });
-}
+function applyDefaults() { Object.entries(DEFAULTS).forEach(([id, val]) => { document.getElementById(id).value = val; }); }
 
 function fmt(n) {
   if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
   if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
   return Math.round(n).toString();
 }
-function fmtDelta(n) {
-  const sign = n >= 0 ? '+' : '';
-  if (Math.abs(n) >= 1e6) return sign + (n/1e6).toFixed(2) + 'M';
-  if (Math.abs(n) >= 1e3) return sign + (n/1e3).toFixed(0) + 'K';
-  return sign + Math.round(n);
+function fmtD(n) {
+  const sign = n > 0 ? '+' : '';
+  return sign + fmt(n);
 }
 function pct(n, t) { return ((n/t)*100).toFixed(1) + '%'; }
 function s(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 
-function calcCovered(base, guestP, locOnP, locOffP, diffP, notifP, openP) {
-  // FIX 1: locOff uses real denied share (loc-on slider + 0.7% other = 100%)
-  // locOffP is passed as 1 - locOnP - LOC_OTHER_P (clamped to 0)
-  const guests   = base * guestP;
-  const loggedIn = base * (1 - guestP);
-  const locOn    = loggedIn * locOnP;
-  const locOff   = loggedIn * locOffP;
-
-  // FIX 2: apply openP to locOn — "while using app" requires app to be foregrounded
-  const locOnActive   = locOn * openP;         // detection actually fires
-  const locOnInactive = locOn * (1 - openP);   // app closed, detection missed
-
-  const bookedActive = locOnActive * (1 - diffP);   // ✅ confirmed on booked train
-  const diffActive   = locOnActive * diffP;          // ❌ on different train, location fires but wrong train
-  const bookedInactive = locOnInactive * (1 - diffP); // ❌ on booked train but app closed
-  const diffInactive   = locOnInactive * diffP;       // ❌ different train AND app closed
-
-  const notifOn  = locOff * notifP;
-  const notifOff = locOff * (1 - notifP);
-  const n1Open   = notifOn  * openP;
-  const n1Closed = notifOn  * (1 - openP);
-  const n0Open   = notifOff * openP;
-  const n0Closed = notifOff * (1 - openP);
-
-  // FIX 3: n0Open ("by luck") moves to partial, not covered
-  const covered    = bookedActive + n1Open;
-  const notCovered = guests + diffActive + diffInactive + bookedInactive + n0Closed;
-  const partial    = n1Closed + n0Open;
-
-  return { guests, loggedIn, locOn, locOff, locOnActive, locOnInactive,
-           bookedActive, diffActive, bookedInactive, diffInactive,
-           notifOn, notifOff, n1Open, n1Closed, n0Open, n0Closed,
-           covered, notCovered, partial };
-}
-
 function calc() {
-  const base    = parseFloat(document.getElementById('i-base').value) || 3e6;
+  const base    = parseFloat(document.getElementById('i-base').value) || 2200000;
   const guestP  = parseFloat(document.getElementById('i-guest').value) / 100;
-  const locOnP  = parseFloat(document.getElementById('i-loc-on').value) / 100;
-  // FIX 1: real loc-off = 1 - locOn - other (0.7%), clamped ≥ 0
-  const locOffP = Math.max(0, 1 - locOnP - LOC_OTHER_P);
-  const diffP   = parseFloat(document.getElementById('i-diff').value) / 100;
-  const notifP  = parseFloat(document.getElementById('i-notif').value) / 100;
-  const openP   = parseFloat(document.getElementById('i-open').value) / 100;
+  const locP    = parseFloat(document.getElementById('i-loc').value) / 100;
+  const bookedP = parseFloat(document.getElementById('i-booked').value) / 100;
+  const manualP = parseFloat(document.getElementById('i-manual').value) / 100;
+  const swapP   = parseFloat(document.getElementById('i-swap').value) / 100;
 
-  const r = calcCovered(base, guestP, locOnP, locOffP, diffP, notifP, openP);
-  const { guests, loggedIn, locOn, locOff,
-          notifOn, notifOff,
-          n1Open, n1Closed, n0Open, n0Closed,
-          bookedActive, diffActive, covered, notCovered, partial } = r;
+  // Update input labels
+  s('v-base',   fmt(base));
+  s('v-guest',  (guestP*100).toFixed(0) + '%');
+  s('v-loc',    (locP*100).toFixed(0) + '%');
+  s('v-booked', (bookedP*100).toFixed(0) + '%');
+  s('v-manual', (manualP*100).toFixed(0) + '%');
+  s('v-swap',   (swapP*100).toFixed(0) + '%');
 
-  // Store default baseline on first run
-  if (defaultCovered === null) defaultCovered = { covered, notCovered, partial, base };
+  // Core calculations
+  const guest    = base * guestP;
+  const loggedIn = base * (1 - guestP);
+  const locOn    = loggedIn * locP;
+  const locOff   = loggedIn * (1 - locP);
 
-  // Delta vs defaults
-  const deltaCovAbs = covered - defaultCovered.covered;
-  const deltaCovRel = defaultCovered.covered > 0 ? (deltaCovAbs / defaultCovered.covered) * 100 : 0;
-  const absCard = document.getElementById('delta-abs-card');
-  const relCard = document.getElementById('delta-rel-card');
-  s('s-delta-abs', fmtDelta(deltaCovAbs));
-  s('s-delta-rel', (deltaCovRel >= 0 ? '+' : '') + deltaCovRel.toFixed(1) + '%');
-  const color = deltaCovAbs > 0 ? '#22c97a' : deltaCovAbs < 0 ? '#f25c5c' : '#7b85a0';
-  document.getElementById('s-delta-abs').style.color = color;
-  document.getElementById('s-delta-rel').style.color = color;
-  absCard.style.borderColor = deltaCovAbs !== 0 ? color : '';
-  relCard.style.borderColor = deltaCovAbs !== 0 ? color : '';
+  const locOnBooked = locOn * bookedP;
+  const locOnOther  = locOn * (1 - bookedP);
+  const locOffBooked = locOff * bookedP;
+  const locOffOther  = locOff * (1 - bookedP);
 
-  // Use bookedActive for the "on booked train" node (was: booked)
-  const booked = bookedActive;
-  const diff   = diffActive + r.diffInactive + r.bookedInactive; // all undetected loc-on
+  const manual   = locOnOther * manualP;
+  const manualNo = locOnOther * (1 - manualP);
+  const swap     = locOffOther * swapP;
+  const swapNo   = locOffOther * (1 - swapP);
 
-  s('f-total',         fmt(base));
-  s('f-guest',         fmt(guests));        s('f-guest-pct',     pct(guests, base) + ' of total');
-  s('f-loggedin',      fmt(loggedIn));      s('f-loggedin-pct',  pct(loggedIn, base) + ' of total');
-  s('f-loc-on',        fmt(locOn));         s('f-loc-on-pct',    pct(locOn, base) + ' of total');
-  s('f-loc-off',       fmt(locOff));        s('f-loc-off-pct',   pct(locOff, base) + ' of total');
-  s('f-booked',        fmt(booked));        s('f-booked-pct',    pct(booked, base) + ' of total');
-  s('f-diff',          fmt(diff));          s('f-diff-pct',      pct(diff, base) + ' of total');
-  s('f-notif-on',      fmt(notifOn));       s('f-notif-on-pct',  pct(notifOn, base));
-  s('f-notif-off',     fmt(notifOff));      s('f-notif-off-pct', pct(notifOff, base));
-  s('f-n1-open',       fmt(n1Open));        s('f-n1-open-pct',   pct(n1Open, base) + ' of total');
-  s('f-n1-closed',     fmt(n1Closed));      s('f-n1-closed-pct', pct(n1Closed, base) + ' of total');
-  s('f-n0-open',       fmt(n0Open));        s('f-n0-open-pct',   pct(n0Open, base) + ' of total');
-  s('f-n0-closed',     fmt(n0Closed));      s('f-n0-closed-pct', pct(n0Closed, base) + ' of total');
-  s('s-covered',       fmt(covered));       s('s-covered-pct',   pct(covered, base) + ' of total');
-  s('s-notcovered',    fmt(notCovered));    s('s-notcovered-pct',pct(notCovered, base) + ' of total');
-  s('s-partial',       fmt(partial));       s('s-partial-pct',   pct(partial, base) + ' of total');
+  // Coverage
+  const covered    = locOnBooked + manual + swap;
+  const notCovered = guest + manualNo + locOffBooked + swapNo;
+  const partial    = 0; // all paths resolve cleanly in this flow
+
+  // Baseline
+  if (defaultCovered === null) defaultCovered = covered;
+  const dAbs = covered - defaultCovered;
+  const dRel = defaultCovered > 0 ? (dAbs / defaultCovered) * 100 : 0;
+  const dColor = dAbs > 0 ? '#22c97a' : dAbs < 0 ? '#f25c5c' : '#7b85a0';
+  s('s-delta-abs', fmtD(dAbs));
+  s('s-delta-rel', (dRel >= 0 ? '+' : '') + dRel.toFixed(1) + '%');
+  ['s-delta-abs','s-delta-rel'].forEach(id => { document.getElementById(id).style.color = dColor; });
+  ['delta-abs-card','delta-rel-card'].forEach(id => { document.getElementById(id).style.borderColor = dAbs !== 0 ? dColor : ''; });
+
+  // Update summary
+  s('s-covered',     fmt(covered));     s('s-covered-pct',    pct(covered, base) + ' of base');
+  s('s-notcovered',  fmt(notCovered));  s('s-notcovered-pct', pct(notCovered, base) + ' of base');
+  s('s-partial',     fmt(partial));     s('s-partial-pct',    pct(partial, base) + ' of base');
+
+  // Update flow nodes
+  s('f-base',           fmt(base));
+  s('f-guest',          fmt(guest));          s('f-guest-pct',          pct(guest, base) + ' · ' + (guestP*100).toFixed(0) + '%');
+  s('f-loggedin',       fmt(loggedIn));       s('f-loggedin-pct',       pct(loggedIn, base) + ' · ' + ((1-guestP)*100).toFixed(0) + '%');
+  s('f-loc-on',         fmt(locOn));          s('f-loc-on-pct',         pct(locOn, base) + ' · ' + (locP*100).toFixed(0) + '%');
+  s('f-loc-off',        fmt(locOff));         s('f-loc-off-pct',        pct(locOff, base) + ' · ' + ((1-locP)*100).toFixed(0) + '%');
+  s('f-loc-on-booked',  fmt(locOnBooked));    s('f-loc-on-booked-pct',  pct(locOnBooked, base) + ' · ' + (bookedP*100).toFixed(0) + '%');
+  s('f-loc-on-other',   fmt(locOnOther));     s('f-loc-on-other-pct',   pct(locOnOther, base) + ' · ' + ((1-bookedP)*100).toFixed(0) + '%');
+  s('f-loc-off-booked', fmt(locOffBooked));   s('f-loc-off-booked-pct', pct(locOffBooked, base) + ' · ' + (bookedP*100).toFixed(0) + '%');
+  s('f-loc-off-other',  fmt(locOffOther));    s('f-loc-off-other-pct',  pct(locOffOther, base) + ' · ' + ((1-bookedP)*100).toFixed(0) + '%');
+  s('f-manual',         fmt(manual));         s('f-manual-pct',         pct(manual, base) + ' · ' + (manualP*100).toFixed(0) + '%');
+  s('f-manual-no',      fmt(manualNo));       s('f-manual-no-pct',      pct(manualNo, base) + ' · ' + ((1-manualP)*100).toFixed(0) + '%');
+  s('f-swap',           fmt(swap));           s('f-swap-pct',           pct(swap, base) + ' · ' + (swapP*100).toFixed(0) + '%');
+  s('f-swap-no',        fmt(swapNo));         s('f-swap-no-pct',        pct(swapNo, base) + ' · ' + ((1-swapP)*100).toFixed(0) + '%');
+
+  // Top 3 opportunities (ranked by volume of uncovered trips each initiative addresses)
+  const opps = [
+    { vol: guest,        name: 'Open DR to guests',              desc: 'Guest users are entirely excluded from DR today. Enabling it unlocks the largest single segment.' },
+    { vol: locOffBooked, name: 'Confirm location-denied users on booked train', desc: 'These users are likely eligible but unconfirmable — a push or retroactive claim flow could recover them.' },
+    { vol: manualNo,     name: 'Reduce "no action" on another train (loc on)', desc: 'Auto-detect train mismatch via movement/signalbox and correct silently, removing the need for manual confirmation.' },
+    { vol: swapNo,       name: 'Improve TrainSwap adoption (loc denied)',       desc: 'A contextual push when a delay is detected could drive more users to complete TrainSwap.' },
+  ].sort((a, b) => b.vol - a.vol).slice(0, 3);
+
+  opps.forEach((o, i) => {
+    const n = i + 1;
+    s(`opp-${n}-vol`,  fmt(o.vol));
+    s(`opp-${n}-name`, o.name);
+    s(`opp-${n}-desc`, o.desc);
+  });
 }
 
 function reset() {
   applyDefaults();
-  defaultCovered = null; // clear baseline so next calc() resets it
+  defaultCovered = null;
   calc();
   const btn = document.getElementById('reset-btn');
   btn.classList.add('flashed');
   setTimeout(() => btn.classList.remove('flashed'), 600);
 }
 
-['i-base','i-guest','i-loc-on','i-diff','i-notif','i-open'].forEach(id => {
+['i-base','i-guest','i-loc','i-booked','i-manual','i-swap'].forEach(id => {
   document.getElementById(id).addEventListener('input', calc);
 });
 document.getElementById('reset-btn').addEventListener('click', reset);
