@@ -3,367 +3,341 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DR Flexible Tickets — Targeted Workflow</title>
+<title>DR Targeted Workflow — Flexible &amp; Advance Tickets</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f1117; --surface: #181c27; --surface2: #1f2436; --border: #2a3050;
-    --text: #e8ecf4; --muted: #7b85a0;
-    --green: #22c97a; --red: #f25c5c; --amber: #f5a623; --blue: #4f6ef7;
-  }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  /* HEADER */
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
-  .logo { width: 26px; height: 26px; background: #00c882; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #000; }
-  header h1 { font-size: 13px; font-weight: 600; }
-  header span { font-size: 11px; color: var(--muted); }
-  .reset-btn { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
-  .reset-btn:hover { border-color: var(--blue); color: var(--blue); }
-  .reset-btn.flashed { border-color: var(--green) !important; color: var(--green) !important; }
-
-  /* LAYOUT */
-  .layout { display: grid; grid-template-columns: 260px 1fr; height: calc(100vh - 53px); }
-
-  /* INPUTS */
-  .inputs { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 18px 14px; }
-  .inputs h2 { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 14px; }
-  .ig { margin-bottom: 18px; }
-  .ig-title { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
-  .ir { margin-bottom: 10px; }
-  .il { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .il span { font-size: 11px; color: var(--text); }
-  .val { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--blue); background: #0f1a3a; padding: 2px 5px; border-radius: 3px; }
-  input[type=number] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; outline: none; }
-  input[type=number]:focus { border-color: var(--blue); }
-  input[type=range] { width: 100%; height: 3px; -webkit-appearance: none; appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--blue); border: 2px solid var(--bg); cursor: pointer; }
-  .hint { font-size: 9px; color: var(--muted); margin-top: 2px; }
-
-  /* MAIN */
-  .main { overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-
-  /* SUMMARY */
-  .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-  .sc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  .sc .sl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
-  .sc .sv { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; }
-  .sc .ss { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .sc-green .sv { color: var(--green); } .sc-red .sv { color: var(--red); } .sc-amber .sv { color: var(--amber); }
-
-  /* OPPORTUNITIES */
-  .opps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .opp { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  .opp-rank { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
-  .opp-vol { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--amber); }
-  .opp-name { font-size: 11px; font-weight: 600; color: var(--text); margin: 3px 0 2px; }
-  .opp-desc { font-size: 10px; color: var(--muted); line-height: 1.4; }
-
-  /* FLOW */
-  .flow-wrap { overflow-x: auto; }
-  .flow { min-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 0; }
-
-  /* NODES */
-  .node { border-radius: 7px; padding: 9px 13px; text-align: center; background: #fff; border: 1.5px solid #d0d5e8; min-width: 130px; }
-  .nt { font-size: 12px; font-weight: 700; color: #111; }
-  .nv { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #222; margin-top: 3px; }
-  .np { font-size: 10px; color: #666; margin-top: 1px; }
-  .ns { font-size: 10px; font-weight: 700; margin-top: 4px; }
-  .n-covered { border-left: 4px solid var(--green); }
-  .n-covered .ns { color: #0a7a40; }
-  .n-gap { border-left: 4px solid var(--red); }
-  .n-gap .ns { color: #b52020; }
-  .n-partial { border-left: 4px solid var(--amber); }
-  .n-partial .ns { color: #8a5500; }
-  .n-neutral { border-left: 4px solid var(--blue); }
-  .n-base { border-left: 4px solid #888; }
-
-  /* CONNECTORS */
-  .drop { display: flex; flex-direction: column; align-items: center; }
-  .drop .line { width: 1px; height: 18px; background: #4a5070; }
-  .drop .arr { font-size: 7px; color: #4a5070; }
-  .row { display: flex; justify-content: center; align-items: flex-start; width: 100%; gap: 8px; }
-  .col { display: flex; flex-direction: column; align-items: center; flex: 1; }
-  .bl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 3px; }
-  .bridge { width: 100%; display: flex; flex-direction: column; align-items: center; }
-  .bridge-line { display: flex; width: 80%; position: relative; }
-  .bridge-line::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: #4a5070; }
-  .bridge-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
-  .section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; align-self: flex-start; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#181c27;--s2:#1f2436;--border:#2a3050;
+  --text:#e8ecf4;--muted:#7b85a0;
+  --green:#22c97a;--red:#f25c5c;--amber:#f5a623;--blue:#4f6ef7;--purple:#a78bfa;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:10px}
+.logo{width:24px;height:24px;background:#00c882;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#000}
+header h1{font-size:13px;font-weight:600}
+header span{font-size:11px;color:var(--muted)}
+.reset-btn{margin-left:auto;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:5px 11px;color:var(--muted);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.reset-btn:hover{border-color:var(--blue);color:var(--blue)}
+.reset-btn.flashed{border-color:var(--green)!important;color:var(--green)!important}
+.layout{display:grid;grid-template-columns:250px 1fr;height:calc(100vh - 49px)}
+/* INPUTS */
+.inputs{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:16px 13px}
+.inputs h2{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
+.ig{margin-bottom:16px}
+.ig-t{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.ir{margin-bottom:9px}
+.il{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.il span{font-size:11px;color:var(--text)}
+.val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--blue);background:#0f1a3a;padding:2px 5px;border-radius:3px}
+input[type=number]{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none}
+input[type=number]:focus{border-color:var(--blue)}
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--blue);border:2px solid var(--bg);cursor:pointer}
+.hint{font-size:9px;color:var(--muted);margin-top:2px}
+/* MAIN */
+.main{overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+/* SUMMARY */
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 11px}
+.sc .sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.sc .sv{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700}
+.sc .ss{font-size:9px;color:var(--muted);margin-top:2px}
+.sc-green .sv{color:var(--green)}.sc-red .sv{color:var(--red)}.sc-amber .sv{color:var(--amber)}
+/* OPPORTUNITIES */
+.opps{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.opp{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 11px}
+.opp-rank{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.opp-vol{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--amber)}
+.opp-name{font-size:11px;font-weight:600;color:var(--text);margin:2px 0}
+.opp-desc{font-size:10px;color:var(--muted);line-height:1.4}
+/* FLOW */
+.flow-wrap{overflow-x:auto}
+.flow{min-width:1300px;display:flex;flex-direction:column;align-items:center;gap:0}
+/* NODES */
+.node{border-radius:7px;padding:8px 12px;text-align:center;background:#fff;border:1.5px solid #d0d5e8;min-width:120px}
+.nt{font-size:12px;font-weight:700;color:#111}
+.nv{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#222;margin-top:2px}
+.np{font-size:10px;color:#666;margin-top:1px}
+.nf{font-size:9px;color:#888;margin-top:1px;font-style:italic}
+.ns{font-size:10px;font-weight:700;margin-top:3px}
+.n-covered{border-left:4px solid var(--green)}.n-covered .ns{color:#0a7a40}
+.n-gap{border-left:4px solid var(--red)}.n-gap .ns{color:#b52020}
+.n-warn{border-left:4px solid var(--amber)}.n-warn .ns{color:#8a5500}
+.n-blue{border-left:4px solid var(--blue)}.n-blue .ns{color:#2040a0}
+.n-purple{border-left:4px solid var(--purple)}
+.n-gray{border-left:4px solid #888}
+/* CONNECTORS */
+.drop{display:flex;flex-direction:column;align-items:center}
+.drop .line{width:1px;height:16px;background:#4a5070}
+.drop .arr{font-size:7px;color:#4a5070}
+.row{display:flex;justify-content:center;align-items:flex-start;width:100%;gap:6px}
+.col{display:flex;flex-direction:column;align-items:center;flex:1}
+.bl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.vline{width:1px;height:16px;background:#4a5070}
+.varr{font-size:7px;color:#4a5070}
+.hbridge{display:flex;width:100%;position:relative}
+.hbridge::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#4a5070}
+.hcol{flex:1;display:flex;flex-direction:column;align-items:center}
+.slabel{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px;align-self:flex-start}
+/* INITIATIVES */
+.initiatives{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.init-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
+.init{border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:default}
+.init-red{background:#2a0f0f;border:1px solid var(--red);color:var(--red)}
+.init-blue{background:#0f1a3a;border:1px solid var(--blue);color:var(--blue)}
+.init-green{background:#0d2a1c;border:1px solid var(--green);color:var(--green)}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">T</div>
-  <h1>DR Flexible Tickets — Targeted Workflow</h1>
-  <span>Delayed trips base · edit inputs to recalculate</span>
+  <h1>DR Targeted Workflow — Flexible &amp; Advance Tickets</h1>
+  <span>3.9M total delayed trips · edit to recalculate</span>
   <button class="reset-btn" id="reset-btn">↺ Reset</button>
 </header>
-
 <div class="layout">
-  <!-- INPUTS -->
-  <div class="inputs">
-    <h2>Inputs</h2>
-    <div class="ig">
-      <div class="ig-title">Base</div>
-      <div class="ir">
-        <div class="il"><span>Delayed flexible trips</span><span class="val" id="v-base"></span></div>
-        <input type="number" id="i-base" min="1" step="10000"/>
-      </div>
+<!-- INPUTS -->
+<div class="inputs">
+  <h2>Inputs</h2>
+  <div class="ig">
+    <div class="ig-t">Total base</div>
+    <div class="ir">
+      <div class="il"><span>Total delayed trips</span><span class="val" id="v-total"></span></div>
+      <input type="number" id="i-total" min="1" step="100000"/>
     </div>
-    <div class="ig">
-      <div class="ig-title">User type</div>
-      <div class="ir">
-        <div class="il"><span>Guest %</span><span class="val" id="v-guest"></span></div>
-        <input type="range" id="i-guest" min="0" max="100" step="1"/>
-      </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">Ticket type split</div>
+    <div class="ir">
+      <div class="il"><span>Flexible %</span><span class="val" id="v-flex"></span></div>
+      <input type="range" id="i-flex" min="0" max="100" step="1"/>
     </div>
-    <div class="ig">
-      <div class="ig-title">Location</div>
-      <div class="ir">
-        <div class="il"><span>While using app %</span><span class="val" id="v-loc"></span></div>
-        <input type="range" id="i-loc" min="0" max="100" step="1"/>
-        <div class="hint">Denied = 100% − this</div>
-      </div>
+    <div class="ir">
+      <div class="il"><span>Advance %</span><span class="val" id="v-adv"></span></div>
+      <input type="range" id="i-adv" min="0" max="100" step="1"/>
+      <div class="hint">Other = 100% − Flex − Advance</div>
     </div>
-    <div class="ig">
-      <div class="ig-title">Train match (both branches)</div>
-      <div class="ir">
-        <div class="il"><span>On booked train %</span><span class="val" id="v-booked"></span></div>
-        <input type="range" id="i-booked" min="0" max="100" step="1"/>
-        <div class="hint">Another train = 100% − this</div>
-      </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">User type (both ticket types)</div>
+    <div class="ir">
+      <div class="il"><span>Guest %</span><span class="val" id="v-guest"></span></div>
+      <input type="range" id="i-guest" min="0" max="100" step="1"/>
     </div>
-    <div class="ig">
-      <div class="ig-title">Location denied · booked train</div>
-      <div class="ir">
-        <div class="il"><span>Manual Confirmation %</span><span class="val" id="v-manual"></span></div>
-        <input type="range" id="i-manual" min="0" max="100" step="1"/>
-      </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">Flexible — location</div>
+    <div class="ir">
+      <div class="il"><span>While using app %</span><span class="val" id="v-loc"></span></div>
+      <input type="range" id="i-loc" min="0" max="100" step="1"/>
+      <div class="hint">Denied = 100% − this</div>
     </div>
-    <div class="ig">
-      <div class="ig-title">Location denied · another train</div>
-      <div class="ir">
-        <div class="il"><span>TrainSwap DONE %</span><span class="val" id="v-swap"></span></div>
-        <input type="range" id="i-swap" min="0" max="100" step="1"/>
-      </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">Flexible — train match</div>
+    <div class="ir">
+      <div class="il"><span>On booked train %</span><span class="val" id="v-booked"></span></div>
+      <input type="range" id="i-booked" min="0" max="100" step="1"/>
+    </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">Flexible — loc denied · booked</div>
+    <div class="ir">
+      <div class="il"><span>Manual Confirmation %</span><span class="val" id="v-manual"></span></div>
+      <input type="range" id="i-manual" min="0" max="100" step="1"/>
+    </div>
+  </div>
+  <div class="ig">
+    <div class="ig-t">Flexible — loc denied · other train</div>
+    <div class="ir">
+      <div class="il"><span>TrainSwap DONE %</span><span class="val" id="v-swap"></span></div>
+      <input type="range" id="i-swap" min="0" max="100" step="1"/>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="sc sc-green"><div class="sl">✅ Covered (flex)</div><div class="sv" id="s-covered">—</div><div class="ss" id="s-covered-pct"></div></div>
+    <div class="sc sc-red"><div class="sl">❌ Not covered (flex)</div><div class="sv" id="s-notcovered">—</div><div class="ss" id="s-notcovered-pct"></div></div>
+    <div class="sc sc-amber"><div class="sl">⚠ Partial / unverified</div><div class="sv" id="s-partial">—</div><div class="ss" id="s-partial-pct"></div></div>
+    <div class="sc" id="delta-abs-card"><div class="sl">Δ vs default (abs)</div><div class="sv" id="s-delta-abs" style="font-size:13px">—</div><div class="ss">covered tickets</div></div>
+    <div class="sc" id="delta-rel-card"><div class="sl">Δ vs default (%)</div><div class="sv" id="s-delta-rel" style="font-size:13px">—</div><div class="ss">coverage rate change</div></div>
+  </div>
+
+  <!-- OPPORTUNITIES -->
+  <div>
+    <div class="slabel">Top 3 opportunities</div>
+    <div class="opps">
+      <div class="opp"><div class="opp-rank">#1 opportunity</div><div class="opp-vol" id="opp-1-vol">—</div><div class="opp-name" id="opp-1-name">—</div><div class="opp-desc" id="opp-1-desc"></div></div>
+      <div class="opp"><div class="opp-rank">#2 opportunity</div><div class="opp-vol" id="opp-2-vol">—</div><div class="opp-name" id="opp-2-name">—</div><div class="opp-desc" id="opp-2-desc"></div></div>
+      <div class="opp"><div class="opp-rank">#3 opportunity</div><div class="opp-vol" id="opp-3-vol">—</div><div class="opp-name" id="opp-3-name">—</div><div class="opp-desc" id="opp-3-desc"></div></div>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
+  <!-- FLOW -->
+  <div class="flow-wrap">
+  <div class="flow">
 
-    <!-- SUMMARY -->
-    <div class="summary">
-      <div class="sc sc-green">
-        <div class="sl">✅ Covered</div>
-        <div class="sv" id="s-covered">—</div>
-        <div class="ss" id="s-covered-pct"></div>
-      </div>
-      <div class="sc sc-red">
-        <div class="sl">❌ Not covered</div>
-        <div class="sv" id="s-notcovered">—</div>
-        <div class="ss" id="s-notcovered-pct"></div>
-      </div>
-      <div class="sc sc-amber">
-        <div class="sl">⚠ Partial</div>
-        <div class="sv" id="s-partial">—</div>
-        <div class="ss" id="s-partial-pct"></div>
-      </div>
-      <div class="sc" id="delta-abs-card">
-        <div class="sl">Δ vs default (abs)</div>
-        <div class="sv" id="s-delta-abs" style="font-size:14px">—</div>
-        <div class="ss">covered tickets</div>
-      </div>
-      <div class="sc" id="delta-rel-card">
-        <div class="sl">Δ vs default (%)</div>
-        <div class="sv" id="s-delta-rel" style="font-size:14px">—</div>
-        <div class="ss">coverage rate change</div>
-      </div>
+    <!-- ROOT -->
+    <div class="node n-gray" style="min-width:220px">
+      <div class="nt">Total delayed trips (industry)</div>
+      <div class="nv" id="f-total">—</div>
+      <div class="np">100%</div>
     </div>
+    <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
 
-    <!-- OPPORTUNITIES -->
-    <div>
-      <div class="section-label">Top 3 opportunities</div>
-      <div class="opps">
-        <div class="opp" id="opp-1">
-          <div class="opp-rank">#1 opportunity</div>
-          <div class="opp-vol" id="opp-1-vol">—</div>
-          <div class="opp-name" id="opp-1-name">—</div>
-          <div class="opp-desc" id="opp-1-desc"></div>
-        </div>
-        <div class="opp" id="opp-2">
-          <div class="opp-rank">#2 opportunity</div>
-          <div class="opp-vol" id="opp-2-vol">—</div>
-          <div class="opp-name" id="opp-2-name">—</div>
-          <div class="opp-desc" id="opp-2-desc"></div>
-        </div>
-        <div class="opp" id="opp-3">
-          <div class="opp-rank">#3 opportunity</div>
-          <div class="opp-vol" id="opp-3-vol">—</div>
-          <div class="opp-name" id="opp-3-name">—</div>
-          <div class="opp-desc" id="opp-3-desc"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FLOW -->
-    <div class="flow-wrap">
-      <div class="flow">
-
-        <!-- ROOT -->
-        <div class="node n-base" style="min-width:200px">
-          <div class="nt">Delayed flexible trips</div>
-          <div class="nv" id="f-base">—</div>
-          <div class="np">100% · industry estimate</div>
+    <!-- TICKET TYPE ROW -->
+    <div class="row">
+      <!-- FLEXIBLE -->
+      <div class="col" style="flex:2.2">
+        <div class="bl">Flexible tickets</div>
+        <div class="node n-blue" style="min-width:180px">
+          <div class="nt">Delayed trips: Flexible</div>
+          <div class="nv" id="f-flex">—</div>
+          <div class="np" id="f-flex-pct"></div>
         </div>
         <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
-
         <!-- GUEST / LOGGED-IN -->
-        <div class="row">
+        <div style="display:flex;width:100%;gap:6px;justify-content:center">
           <div class="col">
             <div class="bl">Guest</div>
-            <div class="node n-gap" style="min-width:160px">
+            <div class="node n-gap" style="min-width:140px">
               <div class="nt">UserType: Guest</div>
-              <div class="nv" id="f-guest">—</div>
-              <div class="np" id="f-guest-pct"></div>
+              <div class="nv" id="f-flex-guest">—</div>
+              <div class="np" id="f-flex-guest-pct"></div>
+              <div class="nf" id="f-flex-guest-fpct"></div>
               <div class="ns">❌ Not covered</div>
             </div>
           </div>
           <div class="col">
             <div class="bl">Logged-in</div>
-            <div class="node n-neutral" style="min-width:160px">
+            <div class="node n-blue" style="min-width:140px">
               <div class="nt">UserType: Logged-in</div>
-              <div class="nv" id="f-loggedin">—</div>
-              <div class="np" id="f-loggedin-pct"></div>
-              <div class="ns" style="color:var(--blue)">→ detection flow</div>
+              <div class="nv" id="f-flex-li">—</div>
+              <div class="np" id="f-flex-li-pct"></div>
+              <div class="nf" id="f-flex-li-fpct"></div>
+              <div class="ns" style="color:#2040a0">→ detection flow</div>
             </div>
-          </div>
-        </div>
-        <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
-
-        <!-- LOCATION -->
-        <div class="row">
-          <div class="col">
-            <div class="bl">Location on</div>
-            <div class="node n-neutral" style="min-width:180px">
-              <div class="nt">Location: While using app</div>
-              <div class="nv" id="f-loc-on">—</div>
-              <div class="np" id="f-loc-on-pct"></div>
-            </div>
-
-            <!-- bridge to booked/another -->
-            <div class="bridge" style="margin-top:0">
-              <div class="drop"><div class="line"></div></div>
-              <div class="bridge-line">
-                <div class="bridge-col">
-                  <div style="width:1px;height:16px;background:#4a5070"></div>
-                  <div style="font-size:7px;color:#4a5070">▼</div>
-                  <div class="bl">Booked train</div>
-                  <div class="node n-partial" style="min-width:140px">
-                    <div class="nt">On booked train</div>
-                    <div class="nv" id="f-loc-on-booked">—</div>
-                    <div class="np" id="f-loc-on-booked-pct"></div>
-                    <div class="ns" style="color:#8a5500">⚠ Est. — verify Aug (Auto-FMT)</div>
-                  </div>
+            <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
+            <!-- LOCATION -->
+            <div style="display:flex;width:100%;gap:6px;justify-content:center">
+              <!-- LOC ON -->
+              <div class="col">
+                <div class="bl">Loc on</div>
+                <div class="node n-blue" style="min-width:150px">
+                  <div class="nt">Location: While using app</div>
+                  <div class="nv" id="f-loc-on">—</div>
+                  <div class="np" id="f-loc-on-pct"></div>
+                  <div class="nf" id="f-loc-on-fpct"></div>
                 </div>
-                <div class="bridge-col">
-                  <div style="width:1px;height:16px;background:#4a5070"></div>
-                  <div style="font-size:7px;color:#4a5070">▼</div>
-                  <div class="bl">Another train</div>
-                  <div class="node n-gap" style="min-width:140px">
-                    <div class="nt">Travelling on another train</div>
-                    <div class="nv" id="f-loc-on-other">—</div>
-                    <div class="np" id="f-loc-on-other-pct"></div>
-                    <div class="ns" style="color:#8a5500">⚠ Estimation — to be verified</div>
+                <div class="drop"><div class="line"></div></div>
+                <div class="hbridge" style="width:90%">
+                  <div class="hcol">
+                    <div class="vline"></div><div class="varr">▼</div>
+                    <div class="bl">Booked</div>
+                    <div class="node n-warn" style="min-width:130px">
+                      <div class="nt">On booked train</div>
+                      <div class="nv" id="f-lon-booked">—</div>
+                      <div class="np" id="f-lon-booked-pct"></div>
+                      <div class="nf" id="f-lon-booked-fpct"></div>
+                      <div class="ns">⚠ Est. verify Aug</div>
+                    </div>
+                  </div>
+                  <div class="hcol">
+                    <div class="vline"></div><div class="varr">▼</div>
+                    <div class="bl">Another train</div>
+                    <div class="node n-warn" style="min-width:130px">
+                      <div class="nt">Travelling on another train</div>
+                      <div class="nv" id="f-lon-other">—</div>
+                      <div class="np" id="f-lon-other-pct"></div>
+                      <div class="nf" id="f-lon-other-fpct"></div>
+                      <div class="ns">⚠ Est. to be verified</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div class="col">
-            <div class="bl">Location denied</div>
-            <div class="node n-partial" style="min-width:180px">
-              <div class="nt">Location: denied</div>
-              <div class="nv" id="f-loc-off">—</div>
-              <div class="np" id="f-loc-off-pct"></div>
-            </div>
-
-            <!-- bridge to booked/another -->
-            <div class="bridge" style="margin-top:0">
-              <div class="drop"><div class="line"></div></div>
-              <div class="bridge-line">
-                <div class="bridge-col">
-                  <div style="width:1px;height:16px;background:#4a5070"></div>
-                  <div style="font-size:7px;color:#4a5070">▼</div>
-                  <div class="bl">Booked train</div>
-                  <div class="node n-partial" style="min-width:140px">
-                    <div class="nt">On booked train</div>
-                    <div class="nv" id="f-loc-off-booked">—</div>
-                    <div class="np" id="f-loc-off-booked-pct"></div>
-                  </div>
-                  <div class="bridge" style="margin-top:0">
+              <!-- LOC DENIED -->
+              <div class="col">
+                <div class="bl">Loc denied</div>
+                <div class="node n-warn" style="min-width:150px">
+                  <div class="nt">Location: denied</div>
+                  <div class="nv" id="f-loc-off">—</div>
+                  <div class="np" id="f-loc-off-pct"></div>
+                  <div class="nf" id="f-loc-off-fpct"></div>
+                </div>
+                <div class="drop"><div class="line"></div></div>
+                <div class="hbridge" style="width:90%">
+                  <!-- DENIED BOOKED -->
+                  <div class="hcol">
+                    <div class="vline"></div><div class="varr">▼</div>
+                    <div class="bl">Booked</div>
+                    <div class="node n-warn" style="min-width:120px">
+                      <div class="nt">On booked train</div>
+                      <div class="nv" id="f-loff-booked">—</div>
+                      <div class="np" id="f-loff-booked-pct"></div>
+                      <div class="nf" id="f-loff-booked-fpct"></div>
+                    </div>
                     <div class="drop"><div class="line"></div></div>
-                    <div class="bridge-line">
-                      <div class="bridge-col">
-                        <div style="width:1px;height:16px;background:#4a5070"></div>
-                        <div style="font-size:7px;color:#4a5070">▼</div>
+                    <div class="hbridge" style="width:95%">
+                      <div class="hcol">
+                        <div class="vline"></div><div class="varr">▼</div>
                         <div class="bl">Confirms</div>
-                        <div class="node n-covered" style="min-width:110px">
+                        <div class="node n-covered" style="min-width:100px">
                           <div class="nt">Manual Confirmation</div>
                           <div class="nv" id="f-manual">—</div>
                           <div class="np" id="f-manual-pct"></div>
+                          <div class="nf" id="f-manual-fpct"></div>
                           <div class="ns">✅ Covered</div>
                         </div>
                       </div>
-                      <div class="bridge-col">
-                        <div style="width:1px;height:16px;background:#4a5070"></div>
-                        <div style="font-size:7px;color:#4a5070">▼</div>
-                        <div class="bl">Does nothing</div>
-                        <div class="node n-gap" style="min-width:110px">
+                      <div class="hcol">
+                        <div class="vline"></div><div class="varr">▼</div>
+                        <div class="bl">No action</div>
+                        <div class="node n-gap" style="min-width:100px">
                           <div class="nt">No action</div>
                           <div class="nv" id="f-manual-no">—</div>
                           <div class="np" id="f-manual-no-pct"></div>
+                          <div class="nf" id="f-manual-no-fpct"></div>
                           <div class="ns">❌ Not covered</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="bridge-col">
-                  <div style="width:1px;height:16px;background:#4a5070"></div>
-                  <div style="font-size:7px;color:#4a5070">▼</div>
-                  <div class="bl">Another train</div>
-                  <div class="node n-partial" style="min-width:140px">
-                    <div class="nt">Travelling on another train</div>
-                    <div class="nv" id="f-loc-off-other">—</div>
-                    <div class="np" id="f-loc-off-other-pct"></div>
-                  </div>
-                  <!-- bridge to trainswap/no action -->
-                  <div class="bridge" style="margin-top:0">
+                  <!-- DENIED OTHER -->
+                  <div class="hcol">
+                    <div class="vline"></div><div class="varr">▼</div>
+                    <div class="bl">Another train</div>
+                    <div class="node n-warn" style="min-width:120px">
+                      <div class="nt">Travelling on another train</div>
+                      <div class="nv" id="f-loff-other">—</div>
+                      <div class="np" id="f-loff-other-pct"></div>
+                      <div class="nf" id="f-loff-other-fpct"></div>
+                    </div>
                     <div class="drop"><div class="line"></div></div>
-                    <div class="bridge-line">
-                      <div class="bridge-col">
-                        <div style="width:1px;height:16px;background:#4a5070"></div>
-                        <div style="font-size:7px;color:#4a5070">▼</div>
+                    <div class="hbridge" style="width:95%">
+                      <div class="hcol">
+                        <div class="vline"></div><div class="varr">▼</div>
                         <div class="bl">TrainSwap</div>
-                        <div class="node n-covered" style="min-width:110px">
+                        <div class="node n-covered" style="min-width:100px">
                           <div class="nt">TrainSwap DONE</div>
                           <div class="nv" id="f-swap">—</div>
                           <div class="np" id="f-swap-pct"></div>
+                          <div class="nf" id="f-swap-fpct"></div>
                           <div class="ns">✅ Covered</div>
                         </div>
                       </div>
-                      <div class="bridge-col">
-                        <div style="width:1px;height:16px;background:#4a5070"></div>
-                        <div style="font-size:7px;color:#4a5070">▼</div>
-                        <div class="bl">Does nothing</div>
-                        <div class="node n-gap" style="min-width:110px">
+                      <div class="hcol">
+                        <div class="vline"></div><div class="varr">▼</div>
+                        <div class="bl">No action</div>
+                        <div class="node n-gap" style="min-width:100px">
                           <div class="nt">No action</div>
                           <div class="nv" id="f-swap-no">—</div>
                           <div class="np" id="f-swap-no-pct"></div>
+                          <div class="nf" id="f-swap-no-fpct"></div>
                           <div class="ns">❌ Not covered</div>
                         </div>
                       </div>
@@ -374,129 +348,190 @@
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- ADVANCE -->
+      <div class="col" style="flex:1.6">
+        <div class="bl">Advance tickets</div>
+        <div class="node n-purple" style="min-width:160px">
+          <div class="nt">Delayed trips: Advance</div>
+          <div class="nv" id="f-adv">—</div>
+          <div class="np" id="f-adv-pct"></div>
+        </div>
+        <div class="drop"><div class="line"></div><div class="arr">▼</div></div>
+        <div style="display:flex;width:100%;gap:6px;justify-content:center">
+          <div class="col">
+            <div class="bl">Guest</div>
+            <div class="node n-gap" style="min-width:130px">
+              <div class="nt">UserType: Guest</div>
+              <div class="nv" id="f-adv-guest">—</div>
+              <div class="np" id="f-adv-guest-pct"></div>
+              <div class="nf" id="f-adv-guest-fpct"></div>
+              <div class="ns">❌ Not covered</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="bl">Logged-in</div>
+            <div class="node n-covered" style="min-width:130px">
+              <div class="nt">UserType: Logged-in</div>
+              <div class="nv" id="f-adv-li">—</div>
+              <div class="np" id="f-adv-li-pct"></div>
+              <div class="nf" id="f-adv-guest-fpct2"></div>
+              <div class="ns">✅ Covered</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTHER -->
+      <div class="col" style="flex:0.5">
+        <div class="bl">Other</div>
+        <div class="node n-gray" style="min-width:100px">
+          <div class="nt">Other tickets</div>
+          <div class="nv" id="f-other">—</div>
+          <div class="np" id="f-other-pct"></div>
+          <div class="ns" style="color:#888">Out of scope</div>
+        </div>
       </div>
     </div>
+
+    <!-- INITIATIVES -->
+    <div style="margin-top:20px;width:100%">
+      <div class="slabel" style="margin-bottom:8px">Initiatives</div>
+      <div class="initiatives">
+        <div class="init init-red">Delay Repay for Guest Users</div>
+        <div class="init init-blue">AutoFMT on Android</div>
+        <div class="init init-blue">AutoFMT on Android (v2)</div>
+        <div class="init init-green">Increase Location turned on</div>
+        <div class="init init-green">Increase Location turned on (v2)</div>
+      </div>
+    </div>
+
   </div>
+  </div>
+</div>
 </div>
 
 <script>
-const DEFAULTS = { 'i-base': 2200000, 'i-guest': 25, 'i-loc': 67, 'i-booked': 55, 'i-manual': 10, 'i-swap': 25 };
-let defaultCovered = null;
+const DEFAULTS={'i-total':3900000,'i-flex':56,'i-adv':41,'i-guest':25,'i-loc':67,'i-booked':55,'i-manual':10,'i-swap':25};
+let defCovered=null;
 
-function applyDefaults() { Object.entries(DEFAULTS).forEach(([id, val]) => { document.getElementById(id).value = val; }); }
+function applyDefaults(){Object.entries(DEFAULTS).forEach(([id,val])=>{document.getElementById(id).value=val});}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return Math.round(n).toString();}
+function fmtD(n){const sg=n>0?'+':'';if(Math.abs(n)>=1e6)return sg+(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return sg+(n/1e3).toFixed(0)+'K';return sg+Math.round(n);}
+function pct(n,t){return((n/t)*100).toFixed(1)+'%';}
+function s(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
-function fmt(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
-  return Math.round(n).toString();
-}
-function fmtD(n) {
-  const sign = n > 0 ? '+' : '';
-  return sign + fmt(n);
-}
-function pct(n, t) { return ((n/t)*100).toFixed(1) + '%'; }
-function s(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function calc(){
+  const total  = parseFloat(document.getElementById('i-total').value)||3900000;
+  const flexP  = parseFloat(document.getElementById('i-flex').value)/100;
+  const advP   = parseFloat(document.getElementById('i-adv').value)/100;
+  const otherP = Math.max(0,1-flexP-advP);
+  const guestP = parseFloat(document.getElementById('i-guest').value)/100;
+  const locP   = parseFloat(document.getElementById('i-loc').value)/100;
+  const bookedP= parseFloat(document.getElementById('i-booked').value)/100;
+  const manualP= parseFloat(document.getElementById('i-manual').value)/100;
+  const swapP  = parseFloat(document.getElementById('i-swap').value)/100;
 
-function calc() {
-  const base    = parseFloat(document.getElementById('i-base').value) || 2200000;
-  const guestP  = parseFloat(document.getElementById('i-guest').value) / 100;
-  const locP    = parseFloat(document.getElementById('i-loc').value) / 100;
-  const bookedP = parseFloat(document.getElementById('i-booked').value) / 100;
-  const manualP = parseFloat(document.getElementById('i-manual').value) / 100;
-  const swapP   = parseFloat(document.getElementById('i-swap').value) / 100;
+  // Input labels
+  s('v-total',fmt(total));s('v-flex',(flexP*100).toFixed(0)+'%');s('v-adv',(advP*100).toFixed(0)+'%');
+  s('v-guest',(guestP*100).toFixed(0)+'%');s('v-loc',(locP*100).toFixed(0)+'%');
+  s('v-booked',(bookedP*100).toFixed(0)+'%');s('v-manual',(manualP*100).toFixed(0)+'%');s('v-swap',(swapP*100).toFixed(0)+'%');
 
-  // Update input labels
-  s('v-base',   fmt(base));
-  s('v-guest',  (guestP*100).toFixed(0) + '%');
-  s('v-loc',    (locP*100).toFixed(0) + '%');
-  s('v-booked', (bookedP*100).toFixed(0) + '%');
-  s('v-manual', (manualP*100).toFixed(0) + '%');
-  s('v-swap',   (swapP*100).toFixed(0) + '%');
+  // Core volumes
+  const flex  = total*flexP;
+  const adv   = total*advP;
+  const other = total*otherP;
 
-  // Core calculations
-  const guest    = base * guestP;
-  const loggedIn = base * (1 - guestP);
-  const locOn    = loggedIn * locP;
-  const locOff   = loggedIn * (1 - locP);
+  const flexGuest = flex*guestP;
+  const flexLI    = flex*(1-guestP);
+  const advGuest  = adv*guestP;
+  const advLI     = adv*(1-guestP);
 
-  const locOnBooked = locOn * bookedP;
-  const locOnOther  = locOn * (1 - bookedP);
-  const locOffBooked = locOff * bookedP;
-  const locOffOther  = locOff * (1 - bookedP);
+  const locOn  = flexLI*locP;
+  const locOff = flexLI*(1-locP);
 
-  const manual   = locOffBooked * manualP;
-  const manualNo = locOffBooked * (1 - manualP);
-  const swap     = locOffOther * swapP;
-  const swapNo   = locOffOther * (1 - swapP);
+  const lonBooked = locOn*bookedP;
+  const lonOther  = locOn*(1-bookedP);
+  const loffBooked= locOff*bookedP;
+  const loffOther = locOff*(1-bookedP);
 
-  // Coverage — locOnBooked is estimation (unverified until Aug), treated as partial
-  const covered    = manual + swap;
-  const notCovered = guest + manualNo + swapNo;
-  const partial    = locOnBooked;
+  const manual   = loffBooked*manualP;
+  const manualNo = loffBooked*(1-manualP);
+  const swap     = loffOther*swapP;
+  const swapNo   = loffOther*(1-swapP);
 
-  // Baseline
-  if (defaultCovered === null) defaultCovered = covered;
-  const dAbs = covered - defaultCovered;
-  const dRel = defaultCovered > 0 ? (dAbs / defaultCovered) * 100 : 0;
-  const dColor = dAbs > 0 ? '#22c97a' : dAbs < 0 ? '#f25c5c' : '#7b85a0';
-  s('s-delta-abs', fmtD(dAbs));
-  s('s-delta-rel', (dRel >= 0 ? '+' : '') + dRel.toFixed(1) + '%');
-  ['s-delta-abs','s-delta-rel'].forEach(id => { document.getElementById(id).style.color = dColor; });
-  ['delta-abs-card','delta-rel-card'].forEach(id => { document.getElementById(id).style.borderColor = dAbs !== 0 ? dColor : ''; });
+  // Coverage (flexible only)
+  const covered    = manual+swap;
+  const notCovered = flexGuest+manualNo+swapNo;
+  const partial    = lonBooked+lonOther; // estimations
 
-  // Update summary
-  s('s-covered',     fmt(covered));     s('s-covered-pct',    pct(covered, base) + ' of base');
-  s('s-notcovered',  fmt(notCovered));  s('s-notcovered-pct', pct(notCovered, base) + ' of base');
-  s('s-partial',     fmt(partial));     s('s-partial-pct',    pct(partial, base) + ' of base');
+  // Delta
+  if(defCovered===null)defCovered=covered;
+  const dAbs=covered-defCovered;
+  const dRel=defCovered>0?(dAbs/defCovered)*100:0;
+  const dc=dAbs>0?'#22c97a':dAbs<0?'#f25c5c':'#7b85a0';
+  s('s-delta-abs',fmtD(dAbs));s('s-delta-rel',(dRel>=0?'+':'')+dRel.toFixed(1)+'%');
+  ['s-delta-abs','s-delta-rel'].forEach(id=>{document.getElementById(id).style.color=dc;});
+  ['delta-abs-card','delta-rel-card'].forEach(id=>{document.getElementById(id).style.borderColor=dAbs!==0?dc:'';});
 
-  // Update flow nodes
-  s('f-base',           fmt(base));
-  s('f-guest',          fmt(guest));          s('f-guest-pct',          pct(guest, base) + ' · ' + (guestP*100).toFixed(0) + '%');
-  s('f-loggedin',       fmt(loggedIn));       s('f-loggedin-pct',       pct(loggedIn, base) + ' · ' + ((1-guestP)*100).toFixed(0) + '%');
-  s('f-loc-on',         fmt(locOn));          s('f-loc-on-pct',         pct(locOn, base) + ' · ' + (locP*100).toFixed(0) + '%');
-  s('f-loc-off',        fmt(locOff));         s('f-loc-off-pct',        pct(locOff, base) + ' · ' + ((1-locP)*100).toFixed(0) + '%');
-  s('f-loc-on-booked',  fmt(locOnBooked));    s('f-loc-on-booked-pct',  pct(locOnBooked, base) + ' · ' + (bookedP*100).toFixed(0) + '%');
-  s('f-loc-on-other',   fmt(locOnOther));     s('f-loc-on-other-pct',   pct(locOnOther, base) + ' · ' + ((1-bookedP)*100).toFixed(0) + '%');
-  s('f-loc-off-booked', fmt(locOffBooked));   s('f-loc-off-booked-pct', pct(locOffBooked, base) + ' · ' + (bookedP*100).toFixed(0) + '%');
-  s('f-loc-off-other',  fmt(locOffOther));    s('f-loc-off-other-pct',  pct(locOffOther, base) + ' · ' + ((1-bookedP)*100).toFixed(0) + '%');
-  s('f-manual',         fmt(manual));         s('f-manual-pct',         pct(manual, base) + ' · ' + (manualP*100).toFixed(0) + '%');
-  s('f-manual-no',      fmt(manualNo));       s('f-manual-no-pct',      pct(manualNo, base) + ' · ' + ((1-manualP)*100).toFixed(0) + '%');
-  s('f-swap',           fmt(swap));           s('f-swap-pct',           pct(swap, base) + ' · ' + (swapP*100).toFixed(0) + '%');
-  s('f-swap-no',        fmt(swapNo));         s('f-swap-no-pct',        pct(swapNo, base) + ' · ' + ((1-swapP)*100).toFixed(0) + '%');
+  // Summary
+  s('s-covered',fmt(covered));s('s-covered-pct',pct(covered,flex)+' of flex base');
+  s('s-notcovered',fmt(notCovered));s('s-notcovered-pct',pct(notCovered,flex)+' of flex base');
+  s('s-partial',fmt(partial));s('s-partial-pct',pct(partial,flex)+' of flex base');
 
-  // Top 3 opportunities — use leaf-level uncovered volumes only
-  const opps = [
-    { vol: guest,        name: 'Open DR to guests',                          desc: 'Guest users are entirely excluded from DR today. Enabling it unlocks the largest single segment.' },
-    { vol: manualNo,     name: 'Location denied · booked train · No action', desc: '270K users on their booked train with location denied take no action. A push notification or retroactive claim flow could recover them.' },
-    { vol: locOnOther,   name: 'Another train · while using app (unverified)',desc: '497K users travelling on a different train with location on — no leaf data yet. Auto-detect via signalbox could unlock this segment. Estimation to be verified Aug.' },
-    { vol: swapNo,       name: 'Location denied · another train · No action', desc: 'Users with location denied on a different train who don\'t complete TrainSwap. A contextual push at delay moment could improve adoption.' },
-  ].sort((a, b) => b.vol - a.vol).slice(0, 3);
+  // Helper: node updater with % of total AND % of flex
+  const n=(id,vol,segPct,base,flexBase)=>{
+    s('f-'+id,fmt(vol));
+    s('f-'+id+'-pct',pct(vol,base)+' · '+(segPct*100).toFixed(0)+'%');
+    if(document.getElementById('f-'+id+'-fpct'))s('f-'+id+'-fpct',pct(vol,flexBase)+' of flex trips');
+  };
 
-  opps.forEach((o, i) => {
-    const n = i + 1;
-    s(`opp-${n}-vol`,  fmt(o.vol));
-    s(`opp-${n}-name`, o.name);
-    s(`opp-${n}-desc`, o.desc);
+  // Flow nodes
+  s('f-total',fmt(total));
+  s('f-flex',fmt(flex));s('f-flex-pct',pct(flex,total)+' · '+(flexP*100).toFixed(0)+'%');
+  s('f-adv',fmt(adv));s('f-adv-pct',pct(adv,total)+' · '+(advP*100).toFixed(0)+'%');
+  s('f-other',fmt(other));s('f-other-pct',pct(other,total)+' · '+(otherP*100).toFixed(1)+'%');
+
+  n('flex-guest', flexGuest, guestP, flex, flex);
+  n('flex-li',    flexLI,    1-guestP, flex, flex);
+  n('adv-guest',  advGuest,  guestP, adv, flex);
+  n('adv-li',     advLI,     1-guestP, adv, flex);
+  // adv-li secondary fpct
+  s('f-adv-guest-fpct2', pct(advLI,flex)+' of flex trips');
+
+  n('loc-on',  locOn,  locP,   flexLI, flex);
+  n('loc-off', locOff, 1-locP, flexLI, flex);
+
+  n('lon-booked', lonBooked, bookedP,   locOn,  flex);
+  n('lon-other',  lonOther,  1-bookedP, locOn,  flex);
+  n('loff-booked',loffBooked,bookedP,   locOff, flex);
+  n('loff-other', loffOther, 1-bookedP, locOff, flex);
+
+  n('manual',    manual,   manualP,   loffBooked, flex);
+  n('manual-no', manualNo, 1-manualP, loffBooked, flex);
+  n('swap',      swap,     swapP,     loffOther,  flex);
+  n('swap-no',   swapNo,   1-swapP,   loffOther,  flex);
+
+  // Opportunities
+  const opps=[
+    {vol:flexGuest,   name:'Open DR to guests (flexible)',        desc:'All guest flexible-ticket holders excluded from DR today.'},
+    {vol:manualNo,    name:'Loc denied · booked · No action',     desc:'269K on booked train, location denied, take no action. Push or retroactive claim flow could recover them.'},
+    {vol:lonOther,    name:'Another train · loc on (unverified)',  desc:'497K on different train with location on — estimation to be verified Aug after Auto-FMT. Signalbox auto-detect could unlock this.'},
+    {vol:swapNo,      name:'Loc denied · other train · No action',desc:'184K with location denied on another train who don\'t complete TrainSwap. Contextual push at delay moment could improve adoption.'},
+    {vol:advGuest,    name:'Open DR to guests (advance)',          desc:'Guest advance-ticket holders also excluded from DR.'},
+  ].sort((a,b)=>b.vol-a.vol).slice(0,3);
+
+  opps.forEach((o,i)=>{
+    const n=i+1;
+    s(`opp-${n}-vol`,fmt(o.vol));s(`opp-${n}-name`,o.name);s(`opp-${n}-desc`,o.desc);
   });
 }
 
-function reset() {
-  applyDefaults();
-  defaultCovered = null;
-  calc();
-  const btn = document.getElementById('reset-btn');
-  btn.classList.add('flashed');
-  setTimeout(() => btn.classList.remove('flashed'), 600);
-}
-
-['i-base','i-guest','i-loc','i-booked','i-manual','i-swap'].forEach(id => {
-  document.getElementById(id).addEventListener('input', calc);
-});
-document.getElementById('reset-btn').addEventListener('click', reset);
-
-applyDefaults();
-calc();
+function reset(){applyDefaults();defCovered=null;calc();const btn=document.getElementById('reset-btn');btn.classList.add('flashed');setTimeout(()=>btn.classList.remove('flashed'),600);}
+['i-total','i-flex','i-adv','i-guest','i-loc','i-booked','i-manual','i-swap'].forEach(id=>{document.getElementById(id).addEventListener('input',calc);});
+document.getElementById('reset-btn').addEventListener('click',reset);
+applyDefaults();calc();
 </script>
 </body>
 </html>
